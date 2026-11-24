@@ -24,12 +24,12 @@ const FALLBACK_SERVICES: Service[] = [
   {
     id: 'airport-transfer',
     name: 'Airport Pick-up Transfer',
-    description: 'Pick-up from Grantley Adams International Airport (or drop-off to the airport) anywhere on the island.',
+    description: 'Pick-up from Grantley Adams International Airport (or drop-off to the airport) anywhere on the island. Look for your custom welcome sign with your name on it at arrivals.',
     pricing_basis: 'per trip',
     price_bbd: null,
     rate_tbd: true,
     max_passengers: 13,
-    extras: [],
+    extras: ['Custom welcome sign'],
   },
   {
     id: 'island-tour',
@@ -82,6 +82,9 @@ export default function App() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
+  // Custom welcome-sign design for airport pickups (from the homepage
+  // designer or typed in the booking flow). Rides along in the notes.
+  const [welcomeSign, setWelcomeSign] = useState('');
 
   useEffect(() => {
     getServices()
@@ -121,11 +124,23 @@ export default function App() {
     }
   };
 
+  // The welcome-sign design rides along in the booking notes so Waymaker
+  // sees it with the airport pickup request.
+  const effectiveNotes = (): string => {
+    const parts: string[] = [];
+    if (form.service_id === 'airport-transfer' && welcomeSign.trim()) {
+      parts.push(`Welcome sign: ${welcomeSign.trim()}`);
+    }
+    const userNotes = form.notes?.trim();
+    if (userNotes) parts.push(userNotes);
+    return parts.join(' ');
+  };
+
   const submit = async () => {
     setError('');
     setSubmitting(true);
     try {
-      const res = await createBooking(form);
+      const res = await createBooking({ ...form, notes: effectiveNotes() });
       setConfirmed(res);
       setStep(5);
     } catch (err) {
@@ -136,6 +151,19 @@ export default function App() {
   };
 
   const startBooking = () => {
+    setForm(EMPTY_FORM);
+    setWelcomeSign('');
+    setView('booking');
+    setStep(0);
+    setConfirmed(null);
+    setError('');
+  };
+
+  // From the homepage welcome-sign designer: airport transfer preselected,
+  // the sign design carried into the booking.
+  const startAirportBookingWithSign = (sign: string) => {
+    setForm({ ...EMPTY_FORM, service_id: 'airport-transfer' });
+    setWelcomeSign(sign);
     setView('booking');
     setStep(0);
     setConfirmed(null);
@@ -170,7 +198,11 @@ export default function App() {
   if (view === 'landing') {
     return (
       <>
-        <LandingPage services={services} onBookNow={startBooking} />
+        <LandingPage
+          services={services}
+          onBookNow={startBooking}
+          onBookAirportWithSign={startAirportBookingWithSign}
+        />
         <ChatWidget services={services} />
         <Footer setView={setView} onBookNow={startBooking} />
       </>
@@ -262,6 +294,24 @@ export default function App() {
               Return trip as well
             </label>
           </div>
+          {form.service_id === 'airport-transfer' && (
+            <div className="field">
+              <label htmlFor="welcome-sign">
+                Your welcome sign (optional)
+              </label>
+              <input
+                id="welcome-sign"
+                value={welcomeSign}
+                onChange={(e) => setWelcomeSign(e.target.value)}
+                placeholder="e.g. Welcome to Barbados, the Smith family!"
+              />
+              <p className="muted">
+                Our custom welcome sign — we&apos;ll hold it with your name
+                at arrivals. Leave it blank and we&apos;ll use the name on
+                your booking.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -348,9 +398,9 @@ export default function App() {
             <strong>Name:</strong> {form.customer_name} · {form.customer_email} ·{' '}
             {form.customer_phone}
           </p>
-          {form.notes && (
+          {effectiveNotes() && (
             <p>
-              <strong>Notes:</strong> {form.notes}
+              <strong>Notes:</strong> {effectiveNotes()}
             </p>
           )}
           <div className="field">
@@ -478,6 +528,9 @@ function Footer({
           </a>
           <a href="#tour" onClick={goToSection('tour')}>
             Island Tour
+          </a>
+          <a href="#plan-your-tour" onClick={goToSection('plan-your-tour')}>
+            Plan Your Tour
           </a>
           <a href="#how-it-works" onClick={goToSection('how-it-works')}>
             How It Works

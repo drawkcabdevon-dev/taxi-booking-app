@@ -21,6 +21,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Anchor jumps (#services, #plan-your-tour, …) land clear of the
+     sticky top nav instead of tucking the section heading under it. */
+  scroll-padding-top: 4.5rem;
 }
 
 * {
@@ -1249,5 +1252,474 @@ label {
   .footer-inner {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+}
+
+/* ---- Plan Your Tour (concierge planner) — 2026-11-24 ---- */
+
+.plan-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.plan-step {
+  margin-top: 2rem;
+}
+
+.plan-step h3 {
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.plan-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.plan-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plan-link {
+  background: none;
+  color: var(--brand-primary);
+  padding: 0;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.plan-stops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.plan-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: left;
+  color: var(--text);
+}
+
+.plan-stop.selected {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 92, 0.15);
+}
+
+.plan-stop-photo {
+  display: block;
+  height: 96px;
+  background-size: cover;
+  background-position: center;
+}
+
+.plan-stop-name {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.plan-stop-check {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.plan-stop.selected .plan-stop-check {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.plan-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0.6rem 0 0;
+}
+
+.plan-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.plan-submit {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1.05rem;
+}
+
+.plan-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.plan-fineprint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+}
+
+.plan-confirm {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* ---- Welcome Sign Designer — 2026-11-24 ---- */
+
+.sign-panel {
+  background: var(--brand-dark);
+  color: #fff;
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.sign-panel h2 {
+  color: #fff;
+}
+
+.sign-panel .section-subhead {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.sign-panel label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sign-panel .plan-fineprint {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sign-designer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  align-items: start;
+}
+
+.sign-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sign-chip {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  border-radius: 999px;
+}
+
+.sign-chip.selected {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  border-color: var(--brand-accent);
+}
+
+.sign-styles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.sign-style {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.4rem;
+  color: #fff;
+}
+
+.sign-style.selected {
+  border-color: var(--brand-accent);
+}
+
+.sign-swatch {
+  width: 100%;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.sign-swatch-classic {
+  background: #fff;
+}
+
+.sign-swatch-tropical {
+  background: var(--brand-accent);
+}
+
+.sign-swatch-celebration {
+  background: var(--brand-primary);
+}
+
+.sign-style-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.sign-style-hint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+}
+
+.sign-cta {
+  margin-top: 1.25rem;
+  width: 100%;
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+}
+
+.sign-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sign-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 5rem;
+}
+
+.sign-preview-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sign-preview {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.sign-preview-classic {
+  background: #fff;
+  color: #1c5c40;
+  border: 6px solid var(--brand-primary);
+}
+
+.sign-preview-tropical {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  border: 6px solid var(--brand-primary);
+}
+
+.sign-preview-celebration {
+  background: #14532d;
+  color: var(--brand-accent);
+  border: 6px solid var(--brand-accent);
+}
+
+.sign-preview-plane {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.sign-preview-text {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.sign-preview-foot {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.sign-preview-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .plan-panel,
+  .sign-panel {
+    padding: 1.75rem;
+  }
+
+  .sign-designer {
+    grid-template-columns: 1fr;
+  }
+
+  .sign-preview-wrap {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .plan-stops {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .plan-stop-photo {
+    height: 80px;
+  }
+
+  .sign-styles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sign-preview-text {
+    font-size: 1.35rem;
+  }
+}
+
+/* Catering menu (2026-11-24): Waymaker's own food photos with the
+   backgrounds removed, presented as a simple Bajan menu. The cutouts
+   sit on a pale tinted tile so the transparency reads as a cutout
+   rather than floating on white. */
+.cater-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.cater-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.cater-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cater-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--brand-light);
+  border-radius: 16px;
+  padding: 0.75rem;
+  filter: drop-shadow(0 10px 18px rgba(20, 32, 28, 0.18));
+}
+
+.cater-menu h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.cater-menu ul {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+.cater-menu li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cater-menu li:last-child {
+  border-bottom: none;
+}
+
+.cater-item-name {
+  font-weight: 600;
+}
+
+.cater-item-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.cater-cta {
+  display: inline-block;
+  background: var(--brand-primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+.cater-cta:hover {
+  filter: brightness(1.07);
+}
+
+.cater-panel .plan-fineprint {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .cater-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cater-panel {
+    padding: 1.75rem 1.25rem;
   }
 }

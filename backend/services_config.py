@@ -33,12 +33,14 @@ SERVICES: list[Service] = [
         name="Airport Pick-up Transfer",
         description=(
             "Pick-up from Grantley Adams International Airport (or drop-off "
-            "to the airport) anywhere on the island."
+            "to the airport) anywhere on the island. Look for your custom "
+            "welcome sign with your name on it at arrivals."
         ),
         pricing_basis="per trip",
         # PLACEHOLDER — rate TBD from Waymaker.
         price_bbd=None,
         rate_tbd=True,
+        extras=["Custom welcome sign"],
     ),
     Service(
         id="island-tour",
