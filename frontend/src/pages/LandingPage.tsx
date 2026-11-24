@@ -1,4 +1,6 @@
 import type { Service } from '../services/api';
+import vanFront from '../assets/van-front.jpg';
+import waymakerCollage from '../assets/waymaker-collage.jpg';
 
 interface Props {
   services: Service[];
@@ -37,6 +39,25 @@ export default function LandingPage({ services, onBookNow }: Props) {
       </section>
 
       <div className="container">
+        <div className="grid gallery">
+          <figure>
+            <img
+              src={vanFront}
+              alt="The Waymaker 13-seat air-conditioned van, ZM 995"
+            />
+            <figcaption>Our 13-seat air-conditioned van — ZM 995</figcaption>
+          </figure>
+          <figure>
+            <img
+              src={waymakerCollage}
+              alt="WayMaker Taxi Service — logo, Bryan with the van, and business card"
+            />
+            <figcaption>
+              WayMaker Taxi Service — “Our love to Serving You is unfailing”
+            </figcaption>
+          </figure>
+        </div>
+
         <h2>Our Services</h2>
         <div className="grid">
           {services.map((service) => (

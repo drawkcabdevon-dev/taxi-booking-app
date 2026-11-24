@@ -113,6 +113,28 @@ label {
   gap: 1rem;
 }
 
+.gallery {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.gallery figure {
+  margin: 0;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.gallery figcaption {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
 .service-card {
   cursor: pointer;
   border: 2px solid var(--border);
@@ -169,6 +191,9 @@ label {
   text-align: center;
   border-radius: 6px;
   background: #fff;
+  /* Day numbers were invisible: the global button rule sets white text,
+     and this white background had no colour override. */
+  color: var(--brand-dark);
   border: 1px solid var(--border);
   font-size: 0.9rem;
 }
