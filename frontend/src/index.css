@@ -1,11 +1,11 @@
 /* Waymaker Taxi Services — base styles.
-   PLACEHOLDER BRANDING: Waymaker has not supplied a logo or palette yet.
-   These colours are stand-ins — swap --brand-* once branding arrives. */
+   Brand palette: soft green + soft yellow, per Devon's direction
+   (2026-11-23). Waymaker has not supplied a logo yet. */
 :root {
-  --brand-primary: #0b5e4b; /* placeholder: deep green */
-  --brand-accent: #f2b705; /* placeholder: warm yellow */
+  --brand-primary: #2e7d5c; /* soft green */
+  --brand-accent: #f2d060; /* soft yellow */
   --brand-dark: #14201c;
-  --brand-light: #f4f7f5;
+  --brand-light: #f2f7f3;
   --text: #1c2420;
   --muted: #5d6b64;
   --border: #d9e2dd;
@@ -218,6 +218,17 @@ label {
 .service-card {
   cursor: pointer;
   border: 2px solid var(--border);
+}
+
+/* Service card images (landing page + booking step 1). The gallery uses
+   its own figure styling and is not inside .card, so this doesn't touch it. */
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+  display: block;
+  margin-bottom: 0.75rem;
 }
 
 .service-card.selected {

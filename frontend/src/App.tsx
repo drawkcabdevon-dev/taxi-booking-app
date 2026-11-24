@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import AvailabilityCalendar from './components/AvailabilityCalendar';
 import ChatWidget from './components/ChatWidget';
+import { SERVICE_IMAGES } from './components/serviceImages';
 import LandingPage from './pages/LandingPage';
 import TermsAndConditions from './pages/TermsAndConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -198,6 +199,12 @@ export default function App() {
               className={`card service-card${form.service_id === service.id ? ' selected' : ''}`}
               onClick={() => set('service_id', service.id)}
             >
+              {SERVICE_IMAGES[service.id] && (
+                <img
+                  src={SERVICE_IMAGES[service.id].src}
+                  alt={SERVICE_IMAGES[service.id].alt}
+                />
+              )}
               <h3>{service.name}</h3>
               <p>{service.description}</p>
               <p>

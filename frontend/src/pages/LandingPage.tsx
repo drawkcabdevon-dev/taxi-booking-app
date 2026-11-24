@@ -1,4 +1,5 @@
 import type { Service } from '../services/api';
+import { SERVICE_IMAGES } from '../components/serviceImages';
 import vanFront from '../assets/van-front.jpg';
 import waymakerCollage from '../assets/waymaker-collage.jpg';
 
@@ -75,18 +76,22 @@ export default function LandingPage({ services, onBookNow }: Props) {
 
         <h2>Our Services</h2>
         <div className="grid">
-          {services.map((service) => (
-            <div key={service.id} className="card">
-              <h3>{service.name}</h3>
-              <p>{service.description}</p>
-              <p>
-                <strong>{priceLabel(service)}</strong>
-              </p>
-              {service.extras.length > 0 && (
-                <p className="muted">Includes: {service.extras.join(' · ')}</p>
-              )}
-            </div>
-          ))}
+          {services.map((service) => {
+            const image = SERVICE_IMAGES[service.id];
+            return (
+              <div key={service.id} className="card">
+                {image && <img src={image.src} alt={image.alt} />}
+                <h3>{service.name}</h3>
+                <p>{service.description}</p>
+                <p>
+                  <strong>{priceLabel(service)}</strong>
+                </p>
+                {service.extras.length > 0 && (
+                  <p className="muted">Includes: {service.extras.join(' · ')}</p>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <h2>The Island Tour</h2>
