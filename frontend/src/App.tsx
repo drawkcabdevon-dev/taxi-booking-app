@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import AvailabilityCalendar from './components/AvailabilityCalendar';
 import ChatWidget from './components/ChatWidget';
 import { SERVICE_IMAGES } from './components/serviceImages';
@@ -146,7 +146,7 @@ export default function App() {
     return (
       <>
         <TermsAndConditions />
-        <Footer setView={setView} />
+        <Footer setView={setView} onBookNow={startBooking} />
       </>
     );
   }
@@ -154,7 +154,7 @@ export default function App() {
     return (
       <>
         <PrivacyPolicy />
-        <Footer setView={setView} />
+        <Footer setView={setView} onBookNow={startBooking} />
       </>
     );
   }
@@ -162,7 +162,7 @@ export default function App() {
     return (
       <>
         <AdminDashboard />
-        <Footer setView={setView} />
+        <Footer setView={setView} onBookNow={startBooking} />
       </>
     );
   }
@@ -172,7 +172,7 @@ export default function App() {
       <>
         <LandingPage services={services} onBookNow={startBooking} />
         <ChatWidget services={services} />
-        <Footer setView={setView} />
+        <Footer setView={setView} onBookNow={startBooking} />
       </>
     );
   }
@@ -433,32 +433,93 @@ export default function App() {
         </div>
       )}
 
-      <Footer setView={setView} />
+      <Footer setView={setView} onBookNow={startBooking} />
     </div>
   );
 }
 
-function Footer({ setView }: { setView: (v: View) => void }) {
+function Footer({
+  setView,
+  onBookNow,
+}: {
+  setView: (v: View) => void;
+  onBookNow: () => void;
+}) {
+  const goToSection =
+    (id: string) => (e: MouseEvent<HTMLAnchorElement>) => {
+      e.preventDefault();
+      setView('landing');
+      // The landing view needs a beat to render before the section exists.
+      window.setTimeout(() => {
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+  const goToView = (v: View) => (e: MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setView(v);
+  };
   return (
     <footer className="footer">
-      <p>
-        Waymaker Taxi Services · Barbados ·{' '}
-        <a href="mailto:waymakertaxiservices@gmail.com">
-          waymakertaxiservices@gmail.com
-        </a>
-      </p>
-      <p>
-        <a href="#" onClick={(e) => { e.preventDefault(); setView('terms'); }}>
-          Terms
-        </a>
-        <a href="#" onClick={(e) => { e.preventDefault(); setView('privacy'); }}>
-          Privacy
-        </a>
-        <a href="#" onClick={(e) => { e.preventDefault(); setView('admin'); }}>
-          Owner Dashboard
-        </a>
-        <a href="https://www.instagram.com/waymakertaxiservice_995">Instagram</a>
-      </p>
+      <div className="footer-inner">
+        <div className="footer-col">
+          <p className="footer-brand-name">
+            Waymaker Taxi Services <span className="footer-plate">ZM 995</span>
+          </p>
+          <p>
+            Friendly, reliable family taxi and island tour service personally
+            hosted by Bryan &amp; Marcia. Welcoming you to experience the
+            authentic warmth and stunning beauty of Barbados.
+          </p>
+        </div>
+        <div className="footer-col">
+          <h4>Quick Links</h4>
+          <a href="#services" onClick={goToSection('services')}>
+            Services &amp; Transfers
+          </a>
+          <a href="#tour" onClick={goToSection('tour')}>
+            Island Tour
+          </a>
+          <a href="#how-it-works" onClick={goToSection('how-it-works')}>
+            How It Works
+          </a>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              onBookNow();
+            }}
+          >
+            Book a Ride
+          </a>
+        </div>
+        <div className="footer-col">
+          <h4>Contact &amp; Connect</h4>
+          <a href="mailto:waymakertaxiservices@gmail.com">
+            waymakertaxiservices@gmail.com
+          </a>
+          <a href="https://www.instagram.com/waymakertaxiservice_995">
+            @waymakertaxiservice_995
+          </a>
+          <span>Authorized Plate: ZM 995</span>
+        </div>
+      </div>
+      <div className="footer-bottom">
+        <span>
+          © 2026 Waymaker Taxi Services. All rights reserved. Barbados Island
+          Hospitality.
+        </span>
+        <span>
+          <a href="#" onClick={goToView('privacy')}>
+            Privacy Policy
+          </a>
+          <a href="#" onClick={goToView('terms')}>
+            Terms of Service
+          </a>
+          <a href="#" onClick={goToView('admin')}>
+            Owner Dashboard
+          </a>
+        </span>
+      </div>
     </footer>
   );
 }
