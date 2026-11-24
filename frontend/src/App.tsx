@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AvailabilityCalendar from './components/AvailabilityCalendar';
+import ChatWidget from './components/ChatWidget';
 import LandingPage from './pages/LandingPage';
 import TermsAndConditions from './pages/TermsAndConditions';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -169,6 +170,7 @@ export default function App() {
     return (
       <>
         <LandingPage services={services} onBookNow={startBooking} />
+        <ChatWidget services={services} />
         <Footer setView={setView} />
       </>
     );

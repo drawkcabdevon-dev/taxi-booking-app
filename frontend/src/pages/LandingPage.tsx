@@ -29,13 +29,28 @@ export default function LandingPage({ services, onBookNow }: Props) {
   return (
     <>
       <section className="hero">
-        <h1>Waymaker Taxi Services</h1>
-        <p>
-          Island tours, airport transfers and private hire across Barbados —
-          in one comfortable 13-seat air-conditioned van. Book online in
-          minutes, no phone calls needed.
-        </p>
-        <button onClick={onBookNow}>Book Now</button>
+        <img
+          className="hero-image"
+          src={vanFront}
+          alt="The Waymaker 13-seat air-conditioned van, ZM 995"
+        />
+        <div className="hero-overlay" aria-hidden="true" />
+        <div className="hero-content">
+          <p className="hero-eyebrow">Waymaker Taxi Services · Barbados</p>
+          <h1>Barbados, on your schedule.</h1>
+          <p className="hero-subhead">
+            Island tours, airport pick-ups and private hire — book online in
+            minutes, no phone calls needed.
+          </p>
+          <button className="hero-cta" onClick={onBookNow}>
+            Book Now
+          </button>
+          <div className="hero-trust">
+            <span>13-seat air-conditioned van</span>
+            <span>Island tours</span>
+            <span>Airport transfers</span>
+          </div>
+        </div>
       </section>
 
       <div className="container">
