@@ -46,8 +46,8 @@ SERVICES: list[Service] = [
         description=(
             "Guided island tour with Bryan: historic Bridgetown, Rihanna "
             "Drive, Mount Gay rum tour, the north coast, Sandy Lane, "
-            "Speightstown, Animal Flower Cave and the east coast. Local "
-            "snacks and rum punch included."
+            "Speightstown, Animal Flower Cave and the east coast. Good "
+            "Time snacks and Marcia's rum punch included."
         ),
         pricing_basis="per tour",
         # PLACEHOLDER — rate TBD from Waymaker (half/full day to confirm).

@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Service } from '../services/api';
 import { SERVICE_IMAGES } from '../components/serviceImages';
@@ -6,6 +7,14 @@ import waymakerCollage from '../assets/waymaker-collage.jpg';
 import how1 from '../assets/how-1.jpg';
 import how2 from '../assets/how-2.jpg';
 import how3 from '../assets/how-3.jpg';
+import stopBridgetown from '../assets/stop-bridgetown.jpg';
+import stopRihanna from '../assets/stop-rihanna.jpg';
+import stopMountGay from '../assets/stop-mountgay.jpg';
+import stopNorthCoast from '../assets/stop-northcoast.jpg';
+import stopSandyLane from '../assets/stop-sandylane.jpg';
+import stopSpeightstown from '../assets/stop-speightstown.jpg';
+import stopAnimalFlower from '../assets/stop-animalflower.jpg';
+import stopEastCoast from '../assets/stop-eastcoast.jpg';
 
 interface Props {
   services: Service[];
@@ -13,45 +22,78 @@ interface Props {
 }
 
 // Tour route from Waymaker's Instagram presence. Stop descriptions are
-// kept short and factual — no invented claims.
-const TOUR_STOPS: { name: string; blurb: string }[] = [
+// kept short and factual — no invented claims. Each "Learn more" link was
+// verified live (HTTP 200, page about that place) on 2026-11-24.
+interface TourStop {
+  name: string;
+  blurb: string;
+  image: string;
+  alt: string;
+  link?: string;
+}
+
+const TOUR_STOPS: TourStop[] = [
   {
     name: 'Historic Bridgetown',
     blurb:
       'UNESCO World Heritage colonial architecture, the Careenage & Parliament buildings.',
+    image: stopBridgetown,
+    alt: 'Boats on the Careenage in Historic Bridgetown, with colourful waterfront buildings',
+    link: 'https://www.visitbarbados.org/discover/unesco-world-heritage-site',
   },
   {
     name: 'Rihanna Drive',
     blurb:
       'The colourful childhood home and tribute street of the international music icon.',
+    image: stopRihanna,
+    alt: 'Chattel houses on Rihanna Drive in Bridgetown',
+    link: 'https://www.nme.com/news/music/street-named-after-rihanna-2167407',
   },
   {
     name: 'Mount Gay Rum Tour',
     blurb:
       'The historic birthplace of rum, with heritage tastings dating back to 1703.',
+    image: stopMountGay,
+    alt: 'Oak rum barrels stacked in the Mount Gay ageing warehouse',
+    link: 'https://www.mountgayrum.com/tour/mount-gay-discovery-experience/',
   },
   {
     name: 'North coast',
     blurb: 'Crashing Atlantic rollers and panoramic lookout points.',
+    image: stopNorthCoast,
+    alt: 'Atlantic waves crashing against the Barbados north coast cliffs',
+    link: 'https://barbados.org/north-point-barbados.htm',
   },
   {
     name: 'Sandy Lane',
     blurb: 'The Platinum Coast — calm turquoise coves and luxury beachfronts.',
+    image: stopSandyLane,
+    alt: 'Calm turquoise water and white sand at Sandy Lane beach',
+    link: 'https://evendo.com/locations/barbados/south-coast/attraction/sandy-lane-beach',
   },
   {
     name: 'Speightstown',
     blurb:
       'Charming historic fishing hub with seaside bakeries and colonial arcades.',
+    image: stopSpeightstown,
+    alt: 'Speightstown waterfront with colourful buildings and turquoise water',
+    link: 'https://yeppa.com/destinations/speightstown',
   },
   {
     name: 'Animal Flower Cave',
     blurb:
       'Dramatic north-point sea caves, natural rock pools, and cliffside vistas.',
+    image: stopAnimalFlower,
+    alt: 'Looking out to the Atlantic from inside Animal Flower Cave',
+    link: 'https://www.animalflowercave.com',
   },
   {
     name: 'East coast',
     blurb:
       'Soup Bowl surf break, mushroom rock formations, and breezy coconut groves.',
+    image: stopEastCoast,
+    alt: 'Bathsheba on the east coast, with mushroom rocks and Atlantic surf',
+    link: 'https://www.visitbarbados.org/the-soup-bowl',
   },
 ];
 
@@ -138,6 +180,8 @@ const ICONS = {
     </>
   ),
   check: <path d="M20 6 9 17l-5-5" />,
+  chevronLeft: <path d="M15 18l-6-6 6-6" />,
+  chevronRight: <path d="M9 18l6-6-6-6" />,
   glass: (
     <>
       <path d="M4 4h16l-8 9-8-9z" />
@@ -201,6 +245,99 @@ const HOW_STEPS = [
     check: 'Email confirmation included',
   },
 ];
+
+// One tour stop as a flip card: photo + name on the front, the description
+// and a "Learn more" link on the back. Click, tap, Enter or Space flips it;
+// the link stops propagation so following it never re-flips the card.
+function TourStopCard({ stop, num }: { stop: TourStop; num: number }) {
+  const [flipped, setFlipped] = useState(false);
+  const toggle = () => setFlipped((f) => !f);
+  return (
+    <div
+      className={`flip-card${flipped ? ' flipped' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={flipped}
+      aria-label={`${stop.name} — flip card, tap for details`}
+      onClick={toggle}
+      onKeyDown={(e) => {
+        // Let the "Learn more" link handle its own keys.
+        if ((e.target as HTMLElement).closest('a')) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+    >
+      <div className="flip-card-inner">
+        <div className="flip-face flip-front">
+          <img src={stop.image} alt={stop.alt} draggable={false} />
+          <div className="flip-front-label">
+            <span className="tour-stop-num">{num}</span>
+            <h4>{stop.name}</h4>
+            <span className="flip-hint">Tap to flip</span>
+          </div>
+        </div>
+        <div className="flip-face flip-back">
+          <span className="tour-stop-num">{num}</span>
+          <h4>{stop.name}</h4>
+          <p>{stop.blurb}</p>
+          {stop.link && (
+            <a
+              href={stop.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Learn more →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The 8 stops in a single horizontally scrolling row, so the section takes
+// no more vertical room than one card. Arrow buttons scroll on desktop;
+// swipe/scroll works natively on touch.
+function TourStopsCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const scrollStops = (dir: number) => {
+    // One card width (260px) + the 1rem gap.
+    trackRef.current?.scrollBy({ left: dir * 276, behavior: 'smooth' });
+  };
+  return (
+    <div className="tour-carousel">
+      <button
+        type="button"
+        className="carousel-arrow"
+        aria-label="Previous tour stops"
+        onClick={() => scrollStops(-1)}
+      >
+        <Icon size={20}>{ICONS.chevronLeft}</Icon>
+      </button>
+      <div
+        className="tour-stops"
+        ref={trackRef}
+        role="region"
+        aria-label="Island tour stops"
+      >
+        {TOUR_STOPS.map((stop, i) => (
+          <TourStopCard key={stop.name} stop={stop} num={i + 1} />
+        ))}
+      </div>
+      <button
+        type="button"
+        className="carousel-arrow"
+        aria-label="Next tour stops"
+        onClick={() => scrollStops(1)}
+      >
+        <Icon size={20}>{ICONS.chevronRight}</Icon>
+      </button>
+    </div>
+  );
+}
 
 export default function LandingPage({ services, onBookNow }: Props) {
   return (
@@ -364,8 +501,9 @@ export default function LandingPage({ services, onBookNow }: Props) {
                   <p className="tour-callout-badge">Included On Tour</p>
                   <h3>Local Snacks &amp; Marcia&apos;s Rum Punch</h3>
                   <p>
-                    Local snacks and Marcia&apos;s rum punch, served along the
-                    way.
+                    Good Time corn curls, peanuts, cashews and raisin &amp; nut
+                    mix — proper Bajan snacks — plus Marcia&apos;s rum punch,
+                    served along the way.
                   </p>
                 </div>
               </aside>
@@ -374,15 +512,7 @@ export default function LandingPage({ services, onBookNow }: Props) {
               <Icon size={18}>{ICONS.pin}</Icon> Key Highlights Along Your
               Custom Itinerary
             </h3>
-            <div className="tour-stops">
-              {TOUR_STOPS.map((stop, i) => (
-                <div key={stop.name} className="tour-stop">
-                  <span className="tour-stop-num">{i + 1}</span>
-                  <h4>{stop.name}</h4>
-                  <p>{stop.blurb}</p>
-                </div>
-              ))}
-            </div>
+            <TourStopsCarousel />
             <div className="tour-flex">
               <div className="tour-flex-text">
                 <Icon size={22}>{ICONS.sliders}</Icon>

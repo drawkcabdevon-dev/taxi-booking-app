@@ -34,7 +34,7 @@ const FALLBACK_SERVICES: Service[] = [
   {
     id: 'island-tour',
     name: 'Island Tour',
-    description: 'Guided island tour: historic Bridgetown, Rihanna Drive, Mount Gay rum tour, the north coast, Sandy Lane, Speightstown, Animal Flower Cave and the east coast.',
+    description: 'Guided island tour with Bryan: historic Bridgetown, Rihanna Drive, Mount Gay rum tour, the north coast, Sandy Lane, Speightstown, Animal Flower Cave and the east coast. Good Time snacks and Marcia\'s rum punch included.',
     pricing_basis: 'per tour',
     price_bbd: null,
     rate_tbd: true,
