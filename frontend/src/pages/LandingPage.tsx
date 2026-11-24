@@ -270,8 +270,16 @@ function TourStopCard({ stop, num }: { stop: TourStop; num: number }) {
       }}
     >
       <div className="flip-card-inner">
-        <div className="flip-face flip-front">
-          <img src={stop.image} alt={stop.alt} draggable={false} />
+        {/* Photo as a background image, not an <img>: Safari mis-sizes
+            object-fit images inside 3D-transformed faces (on iPhone the
+            photo rendered at ~40% of the card width). Backgrounds with
+            cover sizing render full-bleed in every browser. */}
+        <div
+          className="flip-face flip-front"
+          style={{ backgroundImage: `url(${stop.image})` }}
+          role="img"
+          aria-label={stop.alt}
+        >
           <div className="flip-front-label">
             <span className="tour-stop-num">{num}</span>
             <h4>{stop.name}</h4>
@@ -299,42 +307,103 @@ function TourStopCard({ stop, num }: { stop: TourStop; num: number }) {
 }
 
 // The 8 stops in a single horizontally scrolling row, so the section takes
-// no more vertical room than one card. Arrow buttons scroll on desktop;
-// swipe/scroll works natively on touch.
+// no more vertical room than one card. Dot indicators below the cards (all
+// widths) show there is more to see and jump straight to a stop; arrow
+// buttons flank the row on desktop and sit with the dots on mobile.
+// Swipe/scroll works natively on touch. The active dot follows the scroll.
 function TourStopsCarousel() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const scrollStops = (dir: number) => {
-    // One card width (260px) + the 1rem gap.
-    trackRef.current?.scrollBy({ left: dir * 276, behavior: 'smooth' });
+  const [active, setActive] = useState(0);
+
+  // Width of one card plus the 1rem gap, measured from the live layout so
+  // arrows and dots land on the same stops at every viewport width.
+  const cardStep = () => {
+    const track = trackRef.current;
+    if (!track) return 276;
+    const card = track.querySelector('.flip-card');
+    return (card?.getBoundingClientRect().width ?? 260) + 16;
   };
+
+  const scrollStops = (dir: number) => {
+    trackRef.current?.scrollBy({ left: dir * cardStep(), behavior: 'smooth' });
+  };
+
+  const scrollToStop = (index: number) => {
+    trackRef.current?.scrollTo({
+      left: index * cardStep(),
+      behavior: 'smooth',
+    });
+  };
+
+  const onTrackScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    const index = Math.round(track.scrollLeft / cardStep());
+    const clamped = Math.max(0, Math.min(TOUR_STOPS.length - 1, index));
+    setActive((prev) => (prev === clamped ? prev : clamped));
+  };
+
   return (
     <div className="tour-carousel">
-      <button
-        type="button"
-        className="carousel-arrow"
-        aria-label="Previous tour stops"
-        onClick={() => scrollStops(-1)}
-      >
-        <Icon size={20}>{ICONS.chevronLeft}</Icon>
-      </button>
-      <div
-        className="tour-stops"
-        ref={trackRef}
-        role="region"
-        aria-label="Island tour stops"
-      >
-        {TOUR_STOPS.map((stop, i) => (
-          <TourStopCard key={stop.name} stop={stop} num={i + 1} />
-        ))}
+      <div className="tour-track-row">
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-side"
+          aria-label="Previous tour stops"
+          onClick={() => scrollStops(-1)}
+        >
+          <Icon size={20}>{ICONS.chevronLeft}</Icon>
+        </button>
+        <div
+          className="tour-stops"
+          ref={trackRef}
+          role="region"
+          aria-label="Island tour stops"
+          onScroll={onTrackScroll}
+        >
+          {TOUR_STOPS.map((stop, i) => (
+            <TourStopCard key={stop.name} stop={stop} num={i + 1} />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-side"
+          aria-label="Next tour stops"
+          onClick={() => scrollStops(1)}
+        >
+          <Icon size={20}>{ICONS.chevronRight}</Icon>
+        </button>
       </div>
-      <button
-        type="button"
-        className="carousel-arrow"
-        aria-label="Next tour stops"
-        onClick={() => scrollStops(1)}
-      >
-        <Icon size={20}>{ICONS.chevronRight}</Icon>
-      </button>
+      <div className="tour-carousel-controls">
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-inline"
+          aria-label="Previous tour stops"
+          onClick={() => scrollStops(-1)}
+        >
+          <Icon size={20}>{ICONS.chevronLeft}</Icon>
+        </button>
+        <div className="tour-dots" aria-label="Tour stops">
+          {TOUR_STOPS.map((stop, i) => (
+            <button
+              key={stop.name}
+              type="button"
+              className={`tour-dot${i === active ? ' active' : ''}`}
+              aria-label={`Go to stop ${i + 1}: ${stop.name}`}
+              aria-current={i === active}
+              onClick={() => scrollToStop(i)}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-inline"
+          aria-label="Next tour stops"
+          onClick={() => scrollStops(1)}
+        >
+          <Icon size={20}>{ICONS.chevronRight}</Icon>
+        </button>
+      </div>
     </div>
   );
 }
