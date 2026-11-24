@@ -233,7 +233,7 @@ label {
 
 .service-card.selected {
   border-color: var(--brand-primary);
-  box-shadow: 0 0 0 3px rgba(11, 94, 75, 0.15);
+  box-shadow: 0 0 0 3px rgba(46, 125, 92, 0.15);
 }
 
 .muted {
