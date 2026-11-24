@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react';
 import AvailabilityCalendar from './components/AvailabilityCalendar';
 import ChatWidget from './components/ChatWidget';
+import LocationInput from './components/LocationInput';
 import { SERVICE_IMAGES } from './components/serviceImages';
 import LandingPage from './pages/LandingPage';
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -249,24 +250,20 @@ export default function App() {
 
       {step === 1 && (
         <div className="card">
-          <div className="field">
-            <label htmlFor="pickup">Pickup location</label>
-            <input
-              id="pickup"
-              value={form.pickup_location}
-              onChange={(e) => set('pickup_location', e.target.value)}
-              placeholder="e.g. Grantley Adams International Airport"
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="dropoff">Drop-off location</label>
-            <input
-              id="dropoff"
-              value={form.dropoff_location}
-              onChange={(e) => set('dropoff_location', e.target.value)}
-              placeholder="e.g. Your hotel or address"
-            />
-          </div>
+          <LocationInput
+            id="pickup"
+            label="Pickup location"
+            value={form.pickup_location}
+            onChange={(v) => set('pickup_location', v)}
+            placeholder="e.g. Grantley Adams International Airport"
+          />
+          <LocationInput
+            id="dropoff"
+            label="Drop-off location"
+            value={form.dropoff_location}
+            onChange={(v) => set('dropoff_location', v)}
+            placeholder="e.g. Your hotel or address"
+          />
           <div className="field">
             <label>Trip date</label>
             <AvailabilityCalendar

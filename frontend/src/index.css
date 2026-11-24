@@ -1723,3 +1723,95 @@ label {
     padding: 1.75rem 1.25rem;
   }
 }
+
+/* Location autocomplete (2026-11-24): pickup/drop-off fields suggest
+   popular Barbados places (airport, port, hotels, areas) as the
+   customer types. Suggestions only — any address can be typed. */
+.loc-wrap {
+  position: relative;
+}
+
+.loc-wrap input {
+  padding-right: 2.4rem;
+}
+
+.loc-chevron {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.loc-chevron:hover {
+  background: var(--brand-light);
+  color: var(--text);
+}
+
+.loc-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(20, 32, 28, 0.16);
+  max-height: 19rem;
+  overflow-y: auto;
+  padding: 0.35rem 0;
+}
+
+.loc-group {
+  padding: 0.5rem 0.8rem 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.loc-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.loc-option.highlighted {
+  background: var(--brand-light);
+}
+
+.loc-option-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.loc-option-area {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.loc-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
