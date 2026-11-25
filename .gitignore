@@ -1,0 +1,29 @@
+# Secrets / local config
+.env
+.env.local
+*.pem
+*.key
+credentials.json
+service-account.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.envrc
+.pytest_cache/
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+*.log
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp

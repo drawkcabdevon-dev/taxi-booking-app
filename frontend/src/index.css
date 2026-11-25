@@ -1,0 +1,1817 @@
+/* Waymaker Taxi Services — base styles.
+   Brand palette: soft green + soft yellow, per Devon's direction
+   (2026-11-23). Waymaker has not supplied a logo yet.
+   Landing layout blends the original build with a Stitch design
+   (2026-11-24): sticky nav, floating hero card, section headers,
+   tour panel, photo step cards, CTA band, column footer. */
+:root {
+  --brand-primary: #2e7d5c; /* soft green */
+  --brand-accent: #f2d060; /* soft yellow */
+  --brand-dark: #14201c;
+  --brand-light: #f2f7f3;
+  --text: #1c2420;
+  --muted: #5d6b64;
+  --border: #d9e2dd;
+  --danger: #b3261e;
+  --radius: 12px;
+  font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--text);
+  background: var(--brand-light);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Anchor jumps (#services, #plan-your-tour, …) land clear of the
+     sticky top nav instead of tucking the section heading under it. */
+  scroll-padding-top: 4.5rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+}
+
+a {
+  color: var(--brand-primary);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.7rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: inherit;
+}
+
+button.secondary {
+  background: #fff;
+  color: var(--brand-primary);
+  border: 1px solid var(--brand-primary);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  font-family: inherit;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.field {
+  margin-bottom: 1rem;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1rem 3rem;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+}
+
+/* ---- Sticky top navigation (landing page) ---- */
+
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+}
+
+.topnav-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0.7rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topnav-brand {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--brand-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.topnav-badge {
+  background: var(--brand-light);
+  color: var(--brand-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+}
+
+.topnav-links {
+  display: flex;
+  gap: 1.5rem;
+  margin-left: auto;
+}
+
+.topnav-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.topnav-links a:hover {
+  color: var(--brand-primary);
+}
+
+.topnav-cta {
+  padding: 0.55rem 1.2rem;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 720px) {
+  .topnav-links {
+    display: none;
+  }
+
+  .topnav-cta {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .topnav-badge {
+    display: none;
+  }
+}
+
+/* ---- Hero: floating white card over the van photo ---- */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 580px;
+  display: flex;
+  align-items: center;
+}
+
+.hero-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 35%;
+}
+
+.hero-content {
+  position: relative;
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.hero-card {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 16px 48px rgba(20, 32, 28, 0.18);
+  padding: 2rem 2.25rem;
+  max-width: 580px;
+  color: var(--text);
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #dcefe4;
+  color: var(--brand-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  margin: 0 0 1.1rem;
+}
+
+.hero-pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  flex-shrink: 0;
+}
+
+.hero-card h1 {
+  margin: 0 0 0.85rem;
+  font-size: clamp(2.2rem, 5.5vw, 3.4rem);
+  line-height: 1.08;
+  color: var(--brand-dark);
+}
+
+.hero-card h1 em {
+  font-style: italic;
+  color: var(--brand-primary);
+}
+
+.hero-subhead {
+  color: var(--muted);
+  max-width: 520px;
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.hero-cta {
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.85rem 1.6rem;
+  box-shadow: 0 8px 20px rgba(46, 125, 92, 0.35);
+}
+
+.hero-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--brand-light);
+  color: var(--brand-dark);
+  font-weight: 600;
+  text-decoration: none;
+  padding: 0.85rem 1.4rem;
+  border-radius: var(--radius);
+  font-size: 1rem;
+}
+
+.hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+
+.hero-badges span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--brand-dark);
+}
+
+.hero-badges svg {
+  color: var(--brand-primary);
+}
+
+@media (max-width: 640px) {
+  .hero {
+    min-height: 0;
+  }
+
+  .hero-content {
+    padding: 2rem 1rem;
+  }
+
+  .hero-card {
+    padding: 1.5rem;
+    border-radius: 20px;
+  }
+}
+
+/* ---- Landing sections ---- */
+
+.section {
+  padding-top: 3rem;
+  scroll-margin-top: 80px;
+}
+
+.section-header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 2rem;
+}
+
+.section-header h2 {
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  line-height: 1.2;
+  margin: 0.75rem 0;
+  color: var(--brand-dark);
+}
+
+.section-subhead {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.eyebrow-pill {
+  display: inline-block;
+  background: #dcefe4;
+  color: var(--brand-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  margin: 0;
+}
+
+.eyebrow-pill-dark {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.gallery {
+  margin: 1.5rem 0 0.5rem;
+}
+
+.gallery figure {
+  margin: 0;
+}
+
+.gallery img {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.gallery figcaption {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+/* ---- Service cards (landing page) ---- */
+
+.svc-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(20, 32, 28, 0.05);
+}
+
+.svc-card-popular {
+  border: 2px solid var(--brand-primary);
+}
+
+.svc-card-media {
+  position: relative;
+}
+
+.svc-card-media img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  display: block;
+}
+
+.svc-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: #fff;
+  color: var(--brand-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(20, 32, 28, 0.15);
+}
+
+.svc-badge-popular {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+}
+
+.svc-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.svc-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.svc-title-row h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.price-pill {
+  flex-shrink: 0;
+  background: var(--brand-light);
+  color: var(--brand-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.svc-card-body > p {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0.75rem 0 0;
+  flex: 1;
+}
+
+.svc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+}
+
+.svc-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.svc-link {
+  background: none;
+  color: var(--brand-primary);
+  padding: 0;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+/* ---- Island tour panel ---- */
+
+.tour-panel {
+  background: #eaf3ed;
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.tour-head {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.tour-head > div:first-child {
+  flex: 1 1 320px;
+}
+
+.tour-head h2 {
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  line-height: 1.15;
+  margin: 0.75rem 0;
+  color: var(--brand-dark);
+}
+
+.tour-intro {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.tour-callout {
+  flex: 0 1 340px;
+  background: #fff;
+  border-left: 4px solid var(--brand-accent);
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  gap: 1rem;
+  box-shadow: 0 4px 16px rgba(20, 32, 28, 0.06);
+}
+
+.tour-callout-icon {
+  background: #fdf6d8;
+  color: var(--brand-dark);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tour-callout-badge {
+  display: inline-block;
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  margin: 0 0 0.4rem;
+}
+
+.tour-callout h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.tour-callout p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.tour-stops-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem 0 1rem;
+  font-size: 1.05rem;
+  color: var(--brand-dark);
+}
+
+.tour-stops-heading svg {
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+/* ---- Tour stops: horizontal carousel of flip cards ---- */
+
+.tour-carousel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tour-track-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(20, 32, 28, 0.08);
+  padding: 0;
+}
+
+.carousel-arrow:hover {
+  background: var(--brand-light);
+}
+
+/* Inline arrows live in the controls row under the cards; they only show
+   on mobile, where the flanking side arrows are hidden. */
+.carousel-arrow-inline {
+  display: none;
+}
+
+.tour-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.tour-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+/* 24px tap target with an 8px dot centred inside it. */
+.tour-dot {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tour-dot::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #c8ddd2;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+
+.tour-dot.active::after {
+  background: var(--brand-primary);
+  transform: scale(1.35);
+}
+
+.tour-stops {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 0.25rem;
+  scrollbar-width: none;
+  min-width: 0;
+  /* Grow to fill the row: without this the track shrink-wraps to its
+     content, and the cards' percentage widths resolve against that
+     collapsed width instead of the panel (track measured 120px). */
+  flex: 1;
+}
+
+.tour-stops::-webkit-scrollbar {
+  display: none;
+}
+
+.flip-card {
+  flex: 0 0 260px;
+  width: 260px;
+  height: 320px;
+  scroll-snap-align: start;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+  cursor: pointer;
+  outline: none;
+  position: relative;
+}
+
+.flip-card:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+/* Absolute fill (not width/height 100%) so Safari sizes the 3D context
+   from the card's explicit box rather than resolving percentages through
+   the transformed tree. */
+.flip-card-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
+  transition: transform 0.6s;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+/* Longhand offsets, not `inset`, for older Safari. */
+.flip-face {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(20, 32, 28, 0.06);
+}
+
+/* Photo is a background image (set inline per stop): Safari mis-sizes
+   object-fit <img> elements inside 3D-transformed faces, while background
+   cover sizing renders full-bleed everywhere. */
+.flip-front {
+  background-color: #dcefe4;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.flip-front-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2.75rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(20, 32, 28, 0.85), transparent);
+  color: #fff;
+}
+
+.flip-front-label h4 {
+  margin: 0.45rem 0 0.2rem;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.flip-hint {
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.flip-back {
+  background: #fff;
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.flip-back h4 {
+  margin: 0.6rem 0 0.4rem;
+  font-size: 1rem;
+  color: var(--brand-dark);
+}
+
+.flip-back p {
+  margin: 0;
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.flip-back a {
+  color: var(--brand-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.tour-stop-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #dcefe4;
+  color: var(--brand-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner {
+    transition: none;
+  }
+}
+
+.tour-flex {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  margin-top: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.tour-flex-text {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+}
+
+.tour-flex-text > svg {
+  color: var(--brand-primary);
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+.tour-flex-text strong {
+  color: var(--brand-dark);
+}
+
+.tour-flex-text p {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 860px) {
+  .tour-panel {
+    padding: 1.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Flanking arrows give way to the inline arrows in the controls row
+     under the cards, next to the dots. */
+  .carousel-arrow-side {
+    display: none;
+  }
+
+  .carousel-arrow-inline {
+    display: flex;
+  }
+
+  /* Cards at 85% of the track width so the next card peeks in — the
+     standard "there's more" signal. */
+  .flip-card {
+    flex-basis: 85%;
+    width: 85%;
+    height: 300px;
+  }
+}
+
+/* ---- How It Works photo cards ---- */
+
+.how-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(20, 32, 28, 0.05);
+}
+
+.how-photo {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+
+.how-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.how-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #dcefe4;
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.how-card:nth-child(3) .how-icon {
+  background: #fdf6d8;
+  color: var(--brand-dark);
+}
+
+.how-step {
+  margin: 0 0 0.3rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--brand-primary);
+}
+
+.how-body h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+}
+
+.how-body > p:not(.how-step):not(.how-check) {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 0;
+  flex: 1;
+}
+
+.how-check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-top: 1px solid var(--border);
+  margin: 1.1rem 0 0;
+  padding-top: 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--brand-dark);
+}
+
+.how-check svg {
+  color: var(--brand-primary);
+  flex-shrink: 0;
+}
+
+/* ---- Booking CTA band ---- */
+
+.cta-band {
+  background: linear-gradient(135deg, #2e7d5c 0%, #27684e 100%);
+  color: #fff;
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: 0 16px 40px rgba(46, 125, 92, 0.3);
+}
+
+.cta-eyebrow {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  margin: 0 0 1.1rem;
+}
+
+.cta-band h2 {
+  margin: 0 0 0.9rem;
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  line-height: 1.2;
+  max-width: 560px;
+}
+
+.cta-copy {
+  color: #d7e3dc;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 0 1.75rem;
+}
+
+.cta-button {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  font-size: 1.05rem;
+  padding: 0.9rem 1.8rem;
+}
+
+.cta-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
+}
+
+.cta-contact {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+}
+
+.cta-contact-icon {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cta-contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.cta-contact-text small {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  color: #bcd4c8;
+  font-weight: 600;
+}
+
+.cta-contact-text a {
+  color: #fff;
+  font-size: 0.92rem;
+  word-break: break-all;
+}
+
+.cta-contact-text span {
+  font-size: 0.92rem;
+}
+
+@media (max-width: 640px) {
+  .cta-band {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* ---- Booking flow (unchanged) ---- */
+
+.service-card {
+  cursor: pointer;
+  border: 2px solid var(--border);
+}
+
+/* Service card images (booking step 1). The landing page uses its own
+   .svc-card / .how-card classes; the gallery uses its own figure styling. */
+.card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: calc(var(--radius) - 4px);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.service-card.selected {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 92, 0.15);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+  background: #fdecea;
+  border: 1px solid #f5c6c2;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.steps {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.steps .active {
+  color: var(--brand-primary);
+  font-weight: 700;
+}
+
+.nav {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  max-width: 420px;
+}
+
+.calendar .day {
+  padding: 0.6rem 0;
+  text-align: center;
+  border-radius: 6px;
+  background: #fff;
+  /* Day numbers were invisible: the global button rule sets white text,
+     and this white background had no colour override. */
+  color: var(--brand-dark);
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.calendar .day.booked {
+  background: #fdecea;
+  border-color: #f5c6c2;
+  color: var(--muted);
+}
+
+.calendar .day.selected {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.calendar .day:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Footer (columns) ---- */
+
+.footer {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 2.5rem 1rem 1.5rem;
+}
+
+.footer-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr;
+  gap: 2rem;
+}
+
+.footer-brand-name {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--brand-primary);
+  margin: 0 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.footer-plate {
+  background: var(--brand-light);
+  color: var(--brand-primary);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.footer-col p {
+  line-height: 1.6;
+  margin: 0;
+}
+
+.footer-col h4 {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-dark);
+}
+
+.footer-col a,
+.footer-col > span {
+  display: block;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  color: var(--muted);
+}
+
+.footer-col a:hover {
+  color: var(--brand-primary);
+}
+
+.footer-bottom {
+  max-width: 960px;
+  margin: 2rem auto 0;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.footer-bottom a {
+  margin-left: 1rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-bottom a:hover {
+  color: var(--brand-primary);
+}
+
+@media (max-width: 720px) {
+  .footer-inner {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+/* ---- Plan Your Tour (concierge planner) — 2026-11-24 ---- */
+
+.plan-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.plan-step {
+  margin-top: 2rem;
+}
+
+.plan-step h3 {
+  margin: 0 0 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.plan-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.plan-step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.plan-link {
+  background: none;
+  color: var(--brand-primary);
+  padding: 0;
+  font-size: 0.9rem;
+  text-decoration: underline;
+}
+
+.plan-stops {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.plan-stop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: left;
+  color: var(--text);
+}
+
+.plan-stop.selected {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(46, 125, 92, 0.15);
+}
+
+.plan-stop-photo {
+  display: block;
+  height: 96px;
+  background-size: cover;
+  background-position: center;
+}
+
+.plan-stop-name {
+  padding: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.plan-stop-check {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--brand-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.plan-stop.selected .plan-stop-check {
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+.plan-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0.6rem 0 0;
+}
+
+.plan-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.plan-submit {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1.05rem;
+}
+
+.plan-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.plan-fineprint {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0.6rem 0 0;
+}
+
+.plan-confirm {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* ---- Welcome Sign Designer — 2026-11-24 ---- */
+
+.sign-panel {
+  background: var(--brand-dark);
+  color: #fff;
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.sign-panel h2 {
+  color: #fff;
+}
+
+.sign-panel .section-subhead {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.sign-panel label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sign-panel .plan-fineprint {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sign-designer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  align-items: start;
+}
+
+.sign-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sign-chip {
+  background: transparent;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  border-radius: 999px;
+}
+
+.sign-chip.selected {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  border-color: var(--brand-accent);
+}
+
+.sign-styles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.sign-style {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.4rem;
+  color: #fff;
+}
+
+.sign-style.selected {
+  border-color: var(--brand-accent);
+}
+
+.sign-swatch {
+  width: 100%;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.sign-swatch-classic {
+  background: #fff;
+}
+
+.sign-swatch-tropical {
+  background: var(--brand-accent);
+}
+
+.sign-swatch-celebration {
+  background: var(--brand-primary);
+}
+
+.sign-style-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.sign-style-hint {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+}
+
+.sign-cta {
+  margin-top: 1.25rem;
+  width: 100%;
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+}
+
+.sign-cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sign-preview-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  position: sticky;
+  top: 5rem;
+}
+
+.sign-preview-label {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sign-preview {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 10px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+.sign-preview-classic {
+  background: #fff;
+  color: #1c5c40;
+  border: 6px solid var(--brand-primary);
+}
+
+.sign-preview-tropical {
+  background: var(--brand-accent);
+  color: var(--brand-dark);
+  border: 6px solid var(--brand-primary);
+}
+
+.sign-preview-celebration {
+  background: #14532d;
+  color: var(--brand-accent);
+  border: 6px solid var(--brand-accent);
+}
+
+.sign-preview-plane {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.sign-preview-text {
+  font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.sign-preview-foot {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.sign-preview-note {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .plan-panel,
+  .sign-panel {
+    padding: 1.75rem;
+  }
+
+  .sign-designer {
+    grid-template-columns: 1fr;
+  }
+
+  .sign-preview-wrap {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .plan-stops {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .plan-stop-photo {
+    height: 80px;
+  }
+
+  .sign-styles {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .sign-preview-text {
+    font-size: 1.35rem;
+  }
+}
+
+/* Catering menu (2026-11-24): Waymaker's own food photos with the
+   backgrounds removed, presented as a simple Bajan menu. The cutouts
+   sit on a pale tinted tile so the transparency reads as a cutout
+   rather than floating on white. */
+.cater-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 2.5rem;
+}
+
+.cater-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 2rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.cater-photos {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cater-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--brand-light);
+  border-radius: 16px;
+  padding: 0.75rem;
+  filter: drop-shadow(0 10px 18px rgba(20, 32, 28, 0.18));
+}
+
+.cater-menu h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.cater-menu ul {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+}
+
+.cater-menu li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cater-menu li:last-child {
+  border-bottom: none;
+}
+
+.cater-item-name {
+  font-weight: 600;
+}
+
+.cater-item-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.cater-cta {
+  display: inline-block;
+  background: var(--brand-primary);
+  color: #fff;
+  font-weight: 600;
+  padding: 0.8rem 1.4rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+.cater-cta:hover {
+  filter: brightness(1.07);
+}
+
+.cater-panel .plan-fineprint {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .cater-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cater-panel {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+/* Location autocomplete (2026-11-24): pickup/drop-off fields suggest
+   popular Barbados places (airport, port, hotels, areas) as the
+   customer types. Suggestions only — any address can be typed. */
+.loc-wrap {
+  position: relative;
+}
+
+.loc-wrap input {
+  padding-right: 2.4rem;
+}
+
+.loc-chevron {
+  position: absolute;
+  right: 0.35rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.loc-chevron:hover {
+  background: var(--brand-light);
+  color: var(--text);
+}
+
+.loc-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.35rem);
+  z-index: 20;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 28px rgba(20, 32, 28, 0.16);
+  max-height: 19rem;
+  overflow-y: auto;
+  padding: 0.35rem 0;
+}
+
+.loc-group {
+  padding: 0.5rem 0.8rem 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.loc-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.05rem;
+  width: 100%;
+  padding: 0.55rem 0.8rem;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.loc-option.highlighted {
+  background: var(--brand-light);
+}
+
+.loc-option-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.loc-option-area {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.loc-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
