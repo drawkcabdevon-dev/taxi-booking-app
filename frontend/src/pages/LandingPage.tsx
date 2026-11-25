@@ -1,0 +1,611 @@
+import { useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import type { Service } from '../services/api';
+import { SERVICE_IMAGES } from '../components/serviceImages';
+import vanFront from '../assets/van-front.jpg';
+import waymakerCollage from '../assets/waymaker-collage.jpg';
+import how1 from '../assets/how-1.jpg';
+import how2 from '../assets/how-2.jpg';
+import how3 from '../assets/how-3.jpg';
+import { TOUR_STOPS, type TourStop } from '../components/tourStops';
+import PlanYourTour from '../components/PlanYourTour';
+import WelcomeSignDesigner from '../components/WelcomeSignDesigner';
+import CateringMenu from '../components/CateringMenu';
+
+interface Props {
+  services: Service[];
+  onBookNow: () => void;
+  onBookAirportWithSign: (sign: string) => void;
+}
+
+// Per-service presentation for the landing cards. Keyed by service id;
+// services without an entry render plainly with a generic link.
+const SERVICE_META: Record<
+  string,
+  { badge: string; popular?: boolean; link: string }
+> = {
+  'airport-transfer': { badge: 'Grantley Adams (BGI)', link: 'Request Transfer' },
+  'island-tour': {
+    badge: '★ Most Popular',
+    popular: true,
+    link: 'View Tour Details',
+  },
+  'other-function': { badge: 'Private Charter', link: 'Inquire for Events' },
+};
+
+function priceLabel(service: Service): string {
+  if (service.rate_tbd || service.price_bbd === null) return 'Price on request';
+  return `Bds$${service.price_bbd.toFixed(2)} ${service.pricing_basis}`;
+}
+
+// Small inline SVG icon (24×24 stroke icons, currentColor).
+function Icon({
+  children,
+  size = 18,
+}: {
+  children: ReactNode;
+  size?: number;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  );
+}
+
+const ICONS = {
+  van: (
+    <>
+      <path d="M3 17V8a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v9" />
+      <path d="M18 10h2a2 2 0 0 1 2 2v5" />
+      <circle cx="7.5" cy="17.5" r="1.8" />
+      <circle cx="16.5" cy="17.5" r="1.8" />
+      <path d="M3 13h13" />
+    </>
+  ),
+  sun: (
+    <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>
+  ),
+  plane: (
+    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z" />
+  ),
+  pin: (
+    <>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </>
+  ),
+  clipboard: (
+    <>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" />
+    </>
+  ),
+  checkCircle: (
+    <>
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <path d="M22 4 12 14.01l-3-3" />
+    </>
+  ),
+  check: <path d="M20 6 9 17l-5-5" />,
+  chevronLeft: <path d="M15 18l-6-6 6-6" />,
+  chevronRight: <path d="M9 18l6-6-6-6" />,
+  glass: (
+    <>
+      <path d="M4 4h16l-8 9-8-9z" />
+      <path d="M12 13v6M8 21h8" />
+    </>
+  ),
+  sliders: (
+    <>
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="17" y1="16" x2="23" y2="16" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 6-10 7L2 6" />
+    </>
+  ),
+  instagram: (
+    <>
+      <rect x="2" y="2" width="20" height="20" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </>
+  ),
+};
+
+const HOW_STEPS = [
+  {
+    image: how1,
+    alt: 'Booking a trip on a smartphone',
+    icon: ICONS.van,
+    step: 'STEP 01',
+    title: 'Pick a service',
+    text: 'Airport transfer, guided island tour, or private hire for your family or group.',
+    check: 'Rates on request',
+  },
+  {
+    image: how2,
+    alt: 'A palm-lined road on the Barbados east coast',
+    icon: ICONS.clipboard,
+    step: 'STEP 02',
+    title: 'Tell us the trip',
+    text: 'Pickup, drop-off, date, time and how many are travelling — plus your flight number if you have one.',
+    check: 'Book online in minutes',
+  },
+  {
+    image: how3,
+    alt: 'Travellers relaxing on lounge chairs at a tropical beach',
+    icon: ICONS.checkCircle,
+    step: 'STEP 03',
+    title: 'Confirm & Relax',
+    text: 'Review the details, confirm, and get an email confirmation.',
+    check: 'Email confirmation included',
+  },
+];
+
+// One tour stop as a flip card: photo + name on the front, the description
+// and a "Learn more" link on the back. Click, tap, Enter or Space flips it;
+// the link stops propagation so following it never re-flips the card.
+function TourStopCard({ stop, num }: { stop: TourStop; num: number }) {
+  const [flipped, setFlipped] = useState(false);
+  const toggle = () => setFlipped((f) => !f);
+  return (
+    <div
+      className={`flip-card${flipped ? ' flipped' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={flipped}
+      aria-label={`${stop.name} — flip card, tap for details`}
+      onClick={toggle}
+      onKeyDown={(e) => {
+        // Let the "Learn more" link handle its own keys.
+        if ((e.target as HTMLElement).closest('a')) return;
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+    >
+      <div className="flip-card-inner">
+        {/* Photo as a background image, not an <img>: Safari mis-sizes
+            object-fit images inside 3D-transformed faces (on iPhone the
+            photo rendered at ~40% of the card width). Backgrounds with
+            cover sizing render full-bleed in every browser. */}
+        <div
+          className="flip-face flip-front"
+          style={{ backgroundImage: `url(${stop.image})` }}
+          role="img"
+          aria-label={stop.alt}
+        >
+          <div className="flip-front-label">
+            <span className="tour-stop-num">{num}</span>
+            <h4>{stop.name}</h4>
+            <span className="flip-hint">Tap to flip</span>
+          </div>
+        </div>
+        <div className="flip-face flip-back">
+          <span className="tour-stop-num">{num}</span>
+          <h4>{stop.name}</h4>
+          <p>{stop.blurb}</p>
+          {stop.link && (
+            <a
+              href={stop.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              Learn more →
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// The 8 stops in a single horizontally scrolling row, so the section takes
+// no more vertical room than one card. Dot indicators below the cards (all
+// widths) show there is more to see and jump straight to a stop; arrow
+// buttons flank the row on desktop and sit with the dots on mobile.
+// Swipe/scroll works natively on touch. The active dot follows the scroll.
+function TourStopsCarousel() {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  // Width of one card plus the 1rem gap, measured from the live layout so
+  // arrows and dots land on the same stops at every viewport width.
+  const cardStep = () => {
+    const track = trackRef.current;
+    if (!track) return 276;
+    const card = track.querySelector('.flip-card');
+    return (card?.getBoundingClientRect().width ?? 260) + 16;
+  };
+
+  const scrollStops = (dir: number) => {
+    trackRef.current?.scrollBy({ left: dir * cardStep(), behavior: 'smooth' });
+  };
+
+  const scrollToStop = (index: number) => {
+    trackRef.current?.scrollTo({
+      left: index * cardStep(),
+      behavior: 'smooth',
+    });
+  };
+
+  const onTrackScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+    const index = Math.round(track.scrollLeft / cardStep());
+    const clamped = Math.max(0, Math.min(TOUR_STOPS.length - 1, index));
+    setActive((prev) => (prev === clamped ? prev : clamped));
+  };
+
+  return (
+    <div className="tour-carousel">
+      <div className="tour-track-row">
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-side"
+          aria-label="Previous tour stops"
+          onClick={() => scrollStops(-1)}
+        >
+          <Icon size={20}>{ICONS.chevronLeft}</Icon>
+        </button>
+        <div
+          className="tour-stops"
+          ref={trackRef}
+          role="region"
+          aria-label="Island tour stops"
+          onScroll={onTrackScroll}
+        >
+          {TOUR_STOPS.map((stop, i) => (
+            <TourStopCard key={stop.name} stop={stop} num={i + 1} />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-side"
+          aria-label="Next tour stops"
+          onClick={() => scrollStops(1)}
+        >
+          <Icon size={20}>{ICONS.chevronRight}</Icon>
+        </button>
+      </div>
+      <div className="tour-carousel-controls">
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-inline"
+          aria-label="Previous tour stops"
+          onClick={() => scrollStops(-1)}
+        >
+          <Icon size={20}>{ICONS.chevronLeft}</Icon>
+        </button>
+        <div className="tour-dots" aria-label="Tour stops">
+          {TOUR_STOPS.map((stop, i) => (
+            <button
+              key={stop.name}
+              type="button"
+              className={`tour-dot${i === active ? ' active' : ''}`}
+              aria-label={`Go to stop ${i + 1}: ${stop.name}`}
+              aria-current={i === active}
+              onClick={() => scrollToStop(i)}
+            />
+          ))}
+        </div>
+        <button
+          type="button"
+          className="carousel-arrow carousel-arrow-inline"
+          aria-label="Next tour stops"
+          onClick={() => scrollStops(1)}
+        >
+          <Icon size={20}>{ICONS.chevronRight}</Icon>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function LandingPage({
+  services,
+  onBookNow,
+  onBookAirportWithSign,
+}: Props) {
+  return (
+    <>
+      <header className="topnav">
+        <div className="topnav-inner">
+          <a className="topnav-brand" href="#top">
+            Waymaker Taxi Services
+            <span className="topnav-badge">Barbados</span>
+          </a>
+          <nav className="topnav-links" aria-label="Sections">
+            <a href="#services">Services</a>
+            <a href="#tour">Island Tour</a>
+            <a href="#plan-your-tour">Plan Your Tour</a>
+            <a href="#how-it-works">How It Works</a>
+          </nav>
+          <button className="topnav-cta" onClick={onBookNow}>
+            Book Now
+          </button>
+        </div>
+      </header>
+
+      <section className="hero" id="top">
+        <img
+          className="hero-image"
+          src={vanFront}
+          alt="The Waymaker 13-seat air-conditioned van, ZM 995"
+        />
+        <div className="hero-content">
+          <div className="hero-card">
+            <p className="hero-pill">
+              <span className="hero-pill-dot" aria-hidden="true" />
+              ZM 995 · Family owned &amp; operated by Bryan &amp; Marcia
+            </p>
+            <h1>
+              Barbados,
+              <br />
+              <em>on your schedule.</em>
+            </h1>
+            <p className="hero-subhead">
+              Island tours, airport pick-ups and private hire — book online in
+              minutes, no phone calls needed.
+            </p>
+            <div className="hero-actions">
+              <button className="hero-cta" onClick={onBookNow}>
+                Book Now →
+              </button>
+              <a className="hero-secondary" href="#tour">
+                <Icon size={16}>{ICONS.pin}</Icon> Explore Island Tour
+              </a>
+            </div>
+            <div className="hero-badges">
+              <span>
+                <Icon size={16}>{ICONS.van}</Icon> 13-Seat A/C Van
+              </span>
+              <span>
+                <Icon size={16}>{ICONS.sun}</Icon> Island Tours
+              </span>
+              <span>
+                <Icon size={16}>{ICONS.plane}</Icon> Airport Transfers
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="container">
+        <div className="grid gallery">
+          <figure>
+            <img
+              src={vanFront}
+              alt="The Waymaker 13-seat air-conditioned van, ZM 995"
+            />
+            <figcaption>Our 13-seat air-conditioned van — ZM 995</figcaption>
+          </figure>
+          <figure>
+            <img
+              src={waymakerCollage}
+              alt="WayMaker Taxi Service — logo, Bryan with the van, and business card"
+            />
+            <figcaption>
+              WayMaker Taxi Service — “Our love to Serving You is unfailing”
+            </figcaption>
+          </figure>
+        </div>
+
+        <section id="services" className="section">
+          <div className="section-header">
+            <p className="eyebrow-pill">What We Offer</p>
+            <h2>Friendly, Reliable Island Transportation</h2>
+            <p className="section-subhead">
+              Experience genuine Bajan hospitality with Bryan behind the wheel
+              and Marcia coordinating your seamless journeys across every
+              parish.
+            </p>
+          </div>
+          <div className="grid svc-grid">
+            {services.map((service) => {
+              const image = SERVICE_IMAGES[service.id];
+              const meta = SERVICE_META[service.id];
+              const note =
+                service.extras.length > 0
+                  ? service.extras.join(' · ')
+                  : 'Up to 13 passengers';
+              return (
+                <article
+                  key={service.id}
+                  className={`svc-card${meta?.popular ? ' svc-card-popular' : ''}`}
+                >
+                  <div className="svc-card-media">
+                    {image && <img src={image.src} alt={image.alt} />}
+                    {meta && (
+                      <span
+                        className={`svc-badge${meta.popular ? ' svc-badge-popular' : ''}`}
+                      >
+                        {meta.badge}
+                      </span>
+                    )}
+                  </div>
+                  <div className="svc-card-body">
+                    <div className="svc-title-row">
+                      <h3>{service.name}</h3>
+                      <span className="price-pill">{priceLabel(service)}</span>
+                    </div>
+                    <p>{service.description}</p>
+                    <div className="svc-footer">
+                      <span className="svc-note">{note}</span>
+                      <button
+                        type="button"
+                        className="svc-link"
+                        onClick={onBookNow}
+                      >
+                        {meta?.link ?? 'Book Now'} →
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <WelcomeSignDesigner onBookWithSign={onBookAirportWithSign} />
+
+        <section id="tour" className="section">
+          <div className="tour-panel">
+            <div className="tour-head">
+              <div>
+                <p className="eyebrow-pill eyebrow-pill-dark">
+                  Island Adventure
+                </p>
+                <h2>A Day Around Barbados with Bryan</h2>
+                <p className="tour-intro">
+                  A guided day around Barbados with Bryan, from Historic
+                  Bridgetown to the east coast — local snacks and Marcia&apos;s
+                  rum punch included.
+                </p>
+              </div>
+              <aside className="tour-callout">
+                <div className="tour-callout-icon">
+                  <Icon size={22}>{ICONS.glass}</Icon>
+                </div>
+                <div>
+                  <p className="tour-callout-badge">Included On Tour</p>
+                  <h3>Local Snacks &amp; Marcia&apos;s Rum Punch</h3>
+                  <p>
+                    Good Time corn curls, peanuts, cashews and raisin &amp; nut
+                    mix — proper Bajan snacks — plus Marcia&apos;s rum punch,
+                    served along the way.
+                  </p>
+                </div>
+              </aside>
+            </div>
+            <h3 className="tour-stops-heading">
+              <Icon size={18}>{ICONS.pin}</Icon> Key Highlights Along Your
+              Custom Itinerary
+            </h3>
+            <TourStopsCarousel />
+            <div className="tour-flex">
+              <div className="tour-flex-text">
+                <Icon size={22}>{ICONS.sliders}</Icon>
+                <div>
+                  <strong>100% Flexible &amp; Personalized</strong>
+                  <p>
+                    Want more beach time or an extra photo stop? Bryan
+                    customizes each route for you.
+                  </p>
+                </div>
+              </div>
+              <button onClick={onBookNow}>Book This Tour</button>
+            </div>
+          </div>
+        </section>
+
+        <CateringMenu />
+
+        <PlanYourTour />
+
+        <section id="how-it-works" className="section">
+          <div className="section-header">
+            <p className="eyebrow-pill">Simple &amp; Easy</p>
+            <h2>How It Works</h2>
+            <p className="section-subhead">
+              Book your Barbados transport in 3 simple steps.
+            </p>
+          </div>
+          <div className="grid">
+            {HOW_STEPS.map((s) => (
+              <article key={s.step} className="how-card">
+                <img className="how-photo" src={s.image} alt={s.alt} />
+                <div className="how-body">
+                  <div className="how-icon">
+                    <Icon size={22}>{s.icon}</Icon>
+                  </div>
+                  <p className="how-step">{s.step}</p>
+                  <h3>{s.title}</h3>
+                  <p>{s.text}</p>
+                  <p className="how-check">
+                    <Icon size={16}>{ICONS.check}</Icon> {s.check}
+                  </p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="cta-band">
+            <p className="cta-eyebrow">ZM 995 · 13 Passengers</p>
+            <h2>Ready to explore Barbados with Bryan &amp; Marcia?</h2>
+            <p className="cta-copy">
+              Secure your ride in our spacious, air-conditioned 13-seat van
+              (ZM 995). Enjoy dependable airport pickups and unforgettable
+              tailored tours.
+            </p>
+            <button className="cta-button" onClick={onBookNow}>
+              Book Your Ride
+            </button>
+            <div className="cta-contacts">
+              <div className="cta-contact">
+                <span className="cta-contact-icon">
+                  <Icon size={18}>{ICONS.mail}</Icon>
+                </span>
+                <span className="cta-contact-text">
+                  <small>Direct Email</small>
+                  <a href="mailto:waymakertaxiservices@gmail.com">
+                    waymakertaxiservices@gmail.com
+                  </a>
+                </span>
+              </div>
+              <div className="cta-contact">
+                <span className="cta-contact-icon">
+                  <Icon size={18}>{ICONS.instagram}</Icon>
+                </span>
+                <span className="cta-contact-text">
+                  <small>Instagram</small>
+                  <a href="https://www.instagram.com/waymakertaxiservice_995">
+                    @waymakertaxiservice_995
+                  </a>
+                </span>
+              </div>
+              <div className="cta-contact">
+                <span className="cta-contact-icon">
+                  <Icon size={18}>{ICONS.van}</Icon>
+                </span>
+                <span className="cta-contact-text">
+                  <small>Vehicle Details</small>
+                  <span>ZM 995</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
