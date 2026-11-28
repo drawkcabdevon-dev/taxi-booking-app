@@ -14,11 +14,6 @@ export interface Service {
   extras: string[];
 }
 
-export interface BookedSlot {
-  start: string | null;
-  end: string | null;
-}
-
 export interface BookingRequest {
   service_id: string;
   pickup_location: string;
@@ -39,7 +34,21 @@ export interface BookingResponse {
   trip_date: string;
   trip_time: string;
   passengers: number;
-  total_bbd: number;
+  // Legacy field kept for compatibility with older responses. Rates are
+  // quoted on review, so a new request never carries a fixed price.
+  total_bbd: number | null;
+  status?: string;
+  email_sent: boolean;
+}
+
+export interface BookingRequestResponse {
+  booking_id: string;
+  service_id: string;
+  trip_date: string;
+  trip_time: string;
+  passengers: number;
+  status: string;
+  rate: string;
   email_sent: boolean;
 }
 
@@ -61,12 +70,18 @@ export function getServices(): Promise<{ services: Service[] }> {
   return request('/services');
 }
 
-export function getAvailability(
-  tripDate: string,
-): Promise<{ date: string; booked_slots: BookedSlot[] }> {
-  return request(`/availability?trip_date=${tripDate}`);
+/** Create a booking request. No price is sent or calculated here — Bryan &
+ * Marcia quote the rate when they review the request. */
+export function createBookingRequest(
+  booking: BookingRequest,
+): Promise<BookingRequestResponse> {
+  return request('/booking-requests', {
+    method: 'POST',
+    body: JSON.stringify(booking),
+  });
 }
 
+/** Backwards-compatible alias; the backend treats it as a request too. */
 export function createBooking(
   booking: BookingRequest,
 ): Promise<BookingResponse> {

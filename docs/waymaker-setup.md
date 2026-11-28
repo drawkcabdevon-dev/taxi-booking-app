@@ -15,23 +15,24 @@ workspace; this file keeps what a developer needs to finish and deploy the app.
   Guided by Bryan; local snacks and rum punch included.
 - No website today — Instagram is their only online presence.
 
-## Architecture (mirrors DonsRental)
+## Architecture (booking scaffolding only — taxi content)
 
-React 19 + Vite + TypeScript frontend, FastAPI backend on Cloud Run,
-Google Sheets as the data store (tabs: Services, Bookings, Profiles),
-Google Calendar for single-van availability, Gmail API for confirmations,
-ADK chat agent on Vertex AI Agent Engine.
+React 19 + Vite + TypeScript frontend, FastAPI backend (`/api/chat`,
+`/api/booking-requests`, `/api/services`), Google Sheets as the data store
+(tabs: Services, Bookings, Profiles), Gmail API for owner notifications,
+ADK booking-request agent behind `/api/chat`. Requests are also handed to
+Marcia on WhatsApp: (246) 239-7278.
 
-Booking flow: Service → Trip Details → Passengers (max 13) → Your Info →
-Review → Confirm. No license step — passengers don't drive. Pricing is per
-trip / per tour, calculated server-side.
+Booking flow: Service → Trip → Passengers (max 13) → Contact → Confirm.
+Every submission is a **booking request** with status `request_received`;
+Bryan & Marcia quote the rate on review. No vehicle selection, per-day cost,
+availability calendar or rental-style tools. No license step — passengers
+don't drive.
 
 ## Gaps — needed before deploy
 
-1. **Rates** — airport transfer (one-way / return), island tour (half / full
-   day?), other functions / hourly; per-trip or per-person? All rates in
-   `backend/services_config.py` are TBD placeholders. Bookings are refused
-   until rates are confirmed.
+1. **Rates** — quoted per request by Bryan & Marcia. Deliberately not stored
+   or calculated in the app; do not add fixed prices to the backend.
 2. **Coverage** — pickup zones / areas served.
 3. **Branding** — logo file and colours. Frontend colours and copy are
    placeholders.
@@ -41,16 +42,19 @@ trip / per tour, calculated server-side.
 5. **Booking rules** — advance-notice window, cancellation terms, payment
    method (cash / deposit / card?).
 6. **Tour options** — set routes vs custom, durations, what's included.
-7. **Day-to-day owner** — who gets notifications and manages the calendar.
+7. **Google credentials** — Sheet id + service account for request storage
+   and owner notification. Until then `/api/chat` works locally and writes
+   return a clear 503.
 
 ## Before launch checklist
 
-- [ ] Rates confirmed and entered (Services sheet or `services_config.py`)
+- [ ] Rate-quoting process agreed with Bryan & Marcia (no fixed rates in app)
 - [ ] Branding supplied and applied (colours, logo, landing copy)
 - [ ] Domain chosen; CORS allow-list updated; frontend hosting wired
 - [ ] Google Sheet created (Services / Bookings / Profiles tabs)
-- [ ] Google Calendar created and shared with the service account
 - [ ] Service account credentials in Secret Manager / Cloud Run env vars
+- [ ] ADK credentials configured so `/api/chat` uses the live agent
+- [ ] WhatsApp handoff confirmed with Marcia (246) 239-7278
 - [ ] Turnstile site key + secret wired (frontend + backend verification)
 - [ ] Booking rules confirmed and reflected in Terms page
 - [ ] Owner walkthrough of the admin dashboard

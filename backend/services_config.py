@@ -1,12 +1,8 @@
-"""Waymaker Taxi Services — service catalogue and server-side pricing.
+"""Waymaker Taxi Services — service catalogue.
 
-IMPORTANT: All rates are PLACEHOLDER / TBD. Waymaker has not confirmed their
-prices yet. Do NOT invent prices — a booking for a service without a confirmed
-rate is refused with a clear error until the real rate is entered here (or in
-the Services tab of the Google Sheet, which overrides this file).
-
-When rates arrive, fill in `price_bbd` and set `rate_tbd` to False for each
-service. Pricing basis is per trip unless noted otherwise.
+Rates are quoted by Bryan & Marcia when they review a booking request. There
+is no rate calculation in this app: `price_bbd` stays null and `rate_tbd`
+stays true so the UI can say "price on request". Do not invent prices.
 """
 
 from __future__ import annotations
@@ -92,28 +88,3 @@ def service_to_dict(service: Service) -> dict:
         "max_passengers": service.max_passengers,
         "extras": service.extras,
     }
-
-
-class RateNotSetError(ValueError):
-    """Raised when a service has no confirmed rate yet."""
-
-
-def calculate_price(service_id: str, passengers: int) -> float:
-    """Server-side price for a booking. Never trusts client-supplied prices.
-
-    Raises RateNotSetError when the rate is still TBD, and ValueError for
-    unknown services or passenger counts outside 1..13.
-    """
-    service = get_service(service_id)
-    if service is None:
-        raise ValueError(f"Unknown service: {service_id}")
-    if passengers < 1 or passengers > service.max_passengers:
-        raise ValueError(
-            f"Passengers must be between 1 and {service.max_passengers}"
-        )
-    if service.rate_tbd or service.price_bbd is None:
-        raise RateNotSetError(
-            f"Rate for '{service.name}' is not confirmed yet — "
-            "Waymaker has not supplied pricing."
-        )
-    return float(service.price_bbd)

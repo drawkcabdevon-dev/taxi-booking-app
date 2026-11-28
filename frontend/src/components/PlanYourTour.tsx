@@ -118,9 +118,8 @@ export default function PlanYourTour() {
               {chosenNames.join(', ')} — {tourDate}, {passengers} passenger(s).
             </p>
             <p className="muted">
-              {submit.status === 'booked'
-                ? 'A confirmation email is on its way.'
-                : 'Waymaker will confirm your tour dates, bookings and price by email or phone.'}
+              This is a request, not a confirmed tour. Bryan &amp; Marcia review
+              it, quote the rate and confirm the details by email or phone.
             </p>
             <button
               type="button"

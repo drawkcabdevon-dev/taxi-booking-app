@@ -1,42 +1,48 @@
 """Waymaker Taxi Services — booking API (FastAPI).
 
-Mirrors the DonsRental backend layout, adapted for taxi bookings:
-Google Sheets is the data store (Services / Bookings / Profiles tabs),
-Google Calendar tracks single-van availability, and Gmail sends
-confirmation + owner notification emails.
+Taxi-only. Google Sheets stores booking REQUESTS; Gmail notifies the owner.
+Rates are quoted by Bryan & Marcia on review — there are no fixed prices,
+vehicle choices, day rates or availability calendars in this service.
 
-Graceful degradation: the app starts and serves /api/health and
-/api/services (from the local config fallback) with no Google credentials
-at all. Booking and availability endpoints return clear 503 errors when
-their backing service is not configured, instead of crashing.
+The ADK agent is reached through /api/chat (see ../agent/main.py). When ADK
+credentials are absent the same turn contract is produced locally so the
+frontend can still be exercised. Booking requests land in the Bookings tab
+with status 'request_received' and are handed to Marcia's WhatsApp.
 
-No driver's-license handling: passengers don't drive.
+Graceful degradation: /api/health and /api/services work with no Google
+credentials; writes return a clear 503 when storage is not configured.
 """
 
 from __future__ import annotations
 
 import base64
+import importlib.util
 import json
 import logging
 import os
+import sys
 import time
 from collections import defaultdict, deque
 from datetime import date, datetime
 from email.message import EmailMessage
-from typing import Annotated
+from pathlib import Path
+from typing import Annotated, Any
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, EmailStr, Field
 
-from services_config import (
-    RateNotSetError,
-    calculate_price,
-    get_service,
-    service_to_dict,
-    SERVICES,
-)
+from services_config import get_service, service_to_dict, SERVICES
+
+# The ADK agent lives beside the backend in the repo. Load it by path under
+# a distinct module name: both files are called main.py, so a plain import
+# would resolve back to this module when uvicorn runs `main:app`.
+_AGENT_PATH = Path(__file__).resolve().parent.parent / "agent" / "main.py"
+_AGENT_SPEC = importlib.util.spec_from_file_location("waymaker_taxi_agent", _AGENT_PATH)
+taxi_agent = importlib.util.module_from_spec(_AGENT_SPEC)
+sys.modules[_AGENT_SPEC.name] = taxi_agent
+_AGENT_SPEC.loader.exec_module(taxi_agent)
 
 load_dotenv()
 
@@ -45,16 +51,15 @@ log = logging.getLogger("waymaker-taxi")
 
 OWNER_EMAIL = os.environ.get("OWNER_EMAIL", "waymakertaxiservices@gmail.com")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID", "")
-GOOGLE_CALENDAR_ID = os.environ.get("GOOGLE_CALENDAR_ID", "")
 ADMIN_KEY = os.environ.get("ADMIN_KEY", "")
 MAX_PASSENGERS = 13  # single 13-seat van
+WHATSAPP_DISPLAY = taxi_agent.WHATSAPP_DISPLAY
 
-# CORS: production domains only. Add the chosen subdomain here once the
-# domain is confirmed (e.g. https://taxis.onlineverywhere.com).
+# CORS: local dev + the GitHub Pages preview used for review.
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # local dev
+    "http://localhost:5173",
     "http://localhost:8000",
-    # "https://taxis.onlineverywhere.com",  # TODO: uncomment once domain is chosen
+    "https://drawkcabdevon-dev.github.io",
 ]
 
 app = FastAPI(title="Waymaker Taxi Services — Booking API", version="0.1.0")
@@ -121,7 +126,6 @@ def _get_google_service(name: str, version: str):
 
         scopes = {
             "sheets": ["https://www.googleapis.com/auth/spreadsheets"],
-            "calendar": ["https://www.googleapis.com/auth/calendar"],
             "gmail": ["https://www.googleapis.com/auth/gmail.send"],
         }[name]
         creds = service_account.Credentials.from_service_account_info(
@@ -137,10 +141,6 @@ def _get_google_service(name: str, version: str):
 
 def _sheets_configured() -> bool:
     return bool(SPREADSHEET_ID) and _service_account_info() is not None
-
-
-def _calendar_configured() -> bool:
-    return bool(GOOGLE_CALENDAR_ID) and _service_account_info() is not None
 
 
 def _gmail_configured() -> bool:
@@ -177,12 +177,31 @@ class BookingResponse(BaseModel):
     trip_date: date
     trip_time: str
     passengers: int
-    total_bbd: float
+    total_bbd: float | None = None  # legacy field; requests carry no price
+    status: str = "request_received"
     email_sent: bool
 
 
+class BookingRequestResponse(BaseModel):
+    booking_id: str
+    service_id: str
+    trip_date: date
+    trip_time: str
+    passengers: int
+    status: str = "request_received"
+    rate: str = "quoted on review"
+    email_sent: bool
+
+
+class ChatPayload(BaseModel):
+    message: str = Field(min_length=1, max_length=1000)
+    stage: str = "service"
+    draft: dict[str, Any] = Field(default_factory=dict)
+    history: list[dict[str, str]] = Field(default_factory=list)
+
+
 # ---------------------------------------------------------------------------
-# Helpers — Sheets / Calendar / Gmail
+# Helpers — Sheets / Gmail / booking requests
 # ---------------------------------------------------------------------------
 
 
@@ -221,39 +240,6 @@ def _read_sheet_rows(tab: str) -> list[list[str]]:
         return []
 
 
-def _create_calendar_event(booking: BookingRequest, total_bbd: float) -> bool:
-    """Create a private availability event. False when Calendar is unavailable."""
-    service = _get_google_service("calendar", "v3")
-    if service is None or not GOOGLE_CALENDAR_ID:
-        return False
-    start = datetime.combine(
-        booking.trip_date, datetime.strptime(booking.trip_time, "%H:%M").time()
-    )
-    # Taxi bookings block the van in 2-hour slots by default; refine once
-    # booking rules (tour durations etc.) are confirmed with Waymaker.
-    from datetime import timedelta
-
-    end = start + timedelta(hours=2)
-    body = {
-        "summary": f"Taxi booking — {booking.service_id}",
-        "description": (
-            f"{booking.pickup_location} → {booking.dropoff_location}, "
-            f"{booking.passengers} passenger(s). Booking total Bds${total_bbd:.2f}."
-        ),
-        "start": {"dateTime": start.isoformat(), "timeZone": "America/Barbados"},
-        "end": {"dateTime": end.isoformat(), "timeZone": "America/Barbados"},
-        "visibility": "private",
-    }
-    try:
-        service.events().insert(
-            calendarId=GOOGLE_CALENDAR_ID, body=body
-        ).execute()
-        return True
-    except Exception:  # noqa: BLE001
-        log.exception("Failed to create calendar event")
-        return False
-
-
 def _send_email(to: str, subject: str, body: str) -> bool:
     """Send via Gmail API. False when Gmail is unavailable."""
     service = _get_google_service("gmail", "v1")
@@ -271,6 +257,84 @@ def _send_email(to: str, subject: str, body: str) -> bool:
     except Exception:  # noqa: BLE001
         log.exception("Failed to send email to %s", to)
         return False
+
+
+def _create_request_record(booking: BookingRequest) -> BookingRequestResponse:
+    """Store a booking REQUEST and notify the owner. No rate is calculated."""
+    if booking.trip_date < date.today():
+        raise HTTPException(status_code=400, detail="Trip date is in the past.")
+    service = get_service(booking.service_id)
+    if service is None:
+        raise HTTPException(status_code=400, detail="Unknown service.")
+    if not _sheets_configured():
+        raise HTTPException(
+            status_code=503,
+            detail="Booking request storage is not configured yet.",
+        )
+
+    reference = f"WM-REQ-{int(time.time())}"
+    draft = booking.model_dump(mode="json")
+    whatsapp = taxi_agent.whatsapp_link(reference, draft)
+    saved = _append_sheet_row(
+        "Bookings",
+        [
+            reference,
+            "request_received",
+            booking.service_id,
+            booking.pickup_location,
+            booking.dropoff_location,
+            booking.trip_date.isoformat(),
+            booking.trip_time,
+            str(booking.passengers),
+            booking.customer_name,
+            booking.customer_email,
+            booking.customer_phone,
+            booking.notes,
+            "return" if booking.return_trip else "one-way",
+            "rate quoted on review",
+            datetime.now().isoformat(),
+            whatsapp,
+        ],
+    )
+    if not saved:
+        raise HTTPException(
+            status_code=503, detail="Could not save the booking request. Try again."
+        )
+    _append_sheet_row(
+        "Profiles",
+        [
+            booking.customer_email,
+            booking.customer_name,
+            booking.customer_phone,
+            datetime.now().isoformat(),
+        ],
+    )
+
+    owner_sent = _send_email(
+        OWNER_EMAIL,
+        f"New booking request {reference} — {service.name}",
+        (
+            f"New booking REQUEST {reference} (not yet confirmed):\n"
+            f"  Service: {service.name}\n"
+            f"  Trip: {booking.pickup_location} -> {booking.dropoff_location}\n"
+            f"  Date: {booking.trip_date.isoformat()} at {booking.trip_time}\n"
+            f"  Passengers: {booking.passengers}\n"
+            f"  Customer: {booking.customer_name} "
+            f"({booking.customer_email}, {booking.customer_phone})\n"
+            f"  Notes: {booking.notes or '-'}\n\n"
+            f"Please quote the rate and confirm with the customer.\n"
+            f"Marcia's WhatsApp: {WHATSAPP_DISPLAY}\n"
+            f"Prefilled request: {whatsapp}\n"
+        ),
+    )
+    return BookingRequestResponse(
+        booking_id=reference,
+        service_id=booking.service_id,
+        trip_date=booking.trip_date,
+        trip_time=booking.trip_time,
+        passengers=booking.passengers,
+        email_sent=owner_sent,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -297,8 +361,8 @@ def health() -> dict:
         "status": "ok",
         "service": "waymaker-taxi-backend",
         "sheets_configured": _sheets_configured(),
-        "calendar_configured": _calendar_configured(),
         "gmail_configured": _gmail_configured(),
+        "adk_agent": taxi_agent.agent_available(),
     }
 
 
@@ -330,157 +394,75 @@ def list_services() -> dict:
     return {"services": services}
 
 
-@app.get("/api/availability")
-def availability(trip_date: date) -> dict:
-    """Booked time slots for a date (single van). 503 when Calendar is
-    not configured — the frontend degrades to date-only picking."""
-    if not _calendar_configured():
-        raise HTTPException(
-            status_code=503,
-            detail="Availability calendar is not configured yet.",
+@app.post("/api/chat")
+async def chat(payload: ChatPayload) -> dict:
+    """One ADK agent turn. Returns the same contract the chat widget uses.
+
+    When the agent says submit=true, the backend writes the booking request
+    and attaches the WhatsApp handoff. The agent never confirms a booking.
+    """
+    services = [service_to_dict(s) for s in SERVICES]
+    result = await taxi_agent.run_agent_turn(
+        payload.message,
+        payload.stage,
+        payload.draft,
+        services,
+        payload.history,
+    )
+    result.setdefault("chips", [])
+    result.setdefault("stage", payload.stage)
+    result.setdefault("draft", payload.draft)
+    result.setdefault("submit", False)
+    result["mode"] = "adk" if taxi_agent.agent_available() else "offline"
+
+    if result.get("submit"):
+        try:
+            booking = BookingRequest.model_validate(result["draft"])
+        except Exception as exc:  # noqa: BLE001
+            raise HTTPException(status_code=400, detail=f"Incomplete request: {exc}")
+        record = _create_request_record(booking)
+        result["stage"] = "done"
+        result["reference"] = record.booking_id
+        result["whatsapp_url"] = taxi_agent.whatsapp_link(
+            record.booking_id, result["draft"]
         )
-    service = _get_google_service("calendar", "v3")
-    if service is None:
-        raise HTTPException(
-            status_code=503, detail="Availability calendar is unavailable."
+        result["submitted"] = True
+        result["reply"] = (
+            f"Request {record.booking_id} is in. This is NOT a confirmed booking — "
+            f"Bryan & Marcia review it and quote your rate, then confirm with you "
+            f"by email or phone. Send it to Marcia on {WHATSAPP_DISPLAY} if you "
+            f"would like to chase it on WhatsApp."
         )
-    day_start = datetime.combine(trip_date, datetime.min.time()).isoformat() + "Z"
-    day_end = datetime.combine(trip_date, datetime.max.time()).isoformat() + "Z"
-    try:
-        events = (
-            service.events()
-            .list(
-                calendarId=GOOGLE_CALENDAR_ID,
-                timeMin=day_start,
-                timeMax=day_end,
-                singleEvents=True,
-            )
-            .execute()
-            .get("items", [])
-        )
-    except Exception:  # noqa: BLE001
-        log.exception("Failed to read calendar")
-        raise HTTPException(
-            status_code=503, detail="Availability calendar is unavailable."
-        )
-    booked = [
-        {
-            "start": e["start"].get("dateTime"),
-            "end": e["end"].get("dateTime"),
-        }
-        for e in events
-    ]
-    return {"date": trip_date.isoformat(), "booked_slots": booked}
+    else:
+        result["submitted"] = False
+    return result
+
+
+@app.post("/api/booking-requests", status_code=201)
+def create_booking_request(
+    booking: BookingRequest, request: Request
+) -> BookingRequestResponse:
+    """Create a booking REQUEST. No price is sent or calculated — Bryan &
+    Marcia quote the rate when they review it."""
+    _check_booking_rate_limit(request)
+    return _create_request_record(booking)
 
 
 @app.post("/api/bookings", status_code=201)
 def create_booking(booking: BookingRequest, request: Request) -> BookingResponse:
-    """Create a booking. Price is calculated server-side — the client never
-    supplies it. Refuses services whose rate is still TBD."""
+    """Backwards-compatible alias: this now creates a request, not a
+    confirmed booking. Older clients keep working without a price."""
     _check_booking_rate_limit(request)
-
-    # TODO: verify booking.turnstile_token against the Turnstile API with
-    # TURNSTILE_SECRET_KEY before enabling in production.
-    if booking.trip_date < date.today():
-        raise HTTPException(status_code=400, detail="Trip date is in the past.")
-
-    service = get_service(booking.service_id)
-    if service is None:
-        raise HTTPException(status_code=400, detail="Unknown service.")
-
-    try:
-        total = calculate_price(booking.service_id, booking.passengers)
-    except RateNotSetError as exc:
-        raise HTTPException(status_code=503, detail=str(exc))
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
-
-    if booking.return_trip:
-        total *= 2
-
-    booking_id = f"WM-{int(time.time())}"
-
-    if not _sheets_configured():
-        raise HTTPException(
-            status_code=503,
-            detail="Booking storage is not configured yet.",
-        )
-    saved = _append_sheet_row(
-        "Bookings",
-        [
-            booking_id,
-            booking.service_id,
-            booking.pickup_location,
-            booking.dropoff_location,
-            booking.trip_date.isoformat(),
-            booking.trip_time,
-            str(booking.passengers),
-            booking.customer_name,
-            booking.customer_email,
-            booking.customer_phone,
-            booking.notes,
-            "return" if booking.return_trip else "one-way",
-            f"{total:.2f}",
-            datetime.now().isoformat(),
-        ],
-    )
-    if not saved:
-        raise HTTPException(
-            status_code=503, detail="Could not save the booking. Try again."
-        )
-
-    _create_calendar_event(booking, total)
-    _append_sheet_row(
-        "Profiles",
-        [
-            booking.customer_email,
-            booking.customer_name,
-            booking.customer_phone,
-            datetime.now().isoformat(),
-        ],
-    )
-
-    # Emails are best-effort: a booking is not failed because email is down,
-    # but the response says so plainly.
-    customer_sent = _send_email(
-        booking.customer_email,
-        f"Waymaker Taxi Services — booking {booking_id} confirmed",
-        (
-            f"Hi {booking.customer_name},\n\n"
-            f"Your Waymaker Taxi Services booking is confirmed:\n"
-            f"  Service: {service.name}\n"
-            f"  Trip: {booking.pickup_location} → {booking.dropoff_location}\n"
-            f"  Date: {booking.trip_date.isoformat()} at {booking.trip_time}\n"
-            f"  Passengers: {booking.passengers}\n"
-            f"  Total: Bds${total:.2f}\n\n"
-            f"Booking reference: {booking_id}\n"
-            f"Questions? Email {OWNER_EMAIL}.\n"
-        ),
-    )
-    owner_sent = _send_email(
-        OWNER_EMAIL,
-        f"New taxi booking {booking_id} — {service.name}",
-        (
-            f"New booking {booking_id}:\n"
-            f"  Service: {service.name}\n"
-            f"  Trip: {booking.pickup_location} → {booking.dropoff_location}\n"
-            f"  Date: {booking.trip_date.isoformat()} at {booking.trip_time}\n"
-            f"  Passengers: {booking.passengers}\n"
-            f"  Customer: {booking.customer_name} "
-            f"({booking.customer_email}, {booking.customer_phone})\n"
-            f"  Notes: {booking.notes or '-'}\n"
-            f"  Total: Bds${total:.2f}\n"
-        ),
-    )
-
+    record = _create_request_record(booking)
     return BookingResponse(
-        booking_id=booking_id,
-        service_id=booking.service_id,
-        trip_date=booking.trip_date,
-        trip_time=booking.trip_time,
-        passengers=booking.passengers,
-        total_bbd=total,
-        email_sent=customer_sent and owner_sent,
+        booking_id=record.booking_id,
+        service_id=record.service_id,
+        trip_date=record.trip_date,
+        trip_time=record.trip_time,
+        passengers=record.passengers,
+        total_bbd=None,
+        status=record.status,
+        email_sent=record.email_sent,
     )
 
 

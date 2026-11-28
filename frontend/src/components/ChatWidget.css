@@ -55,6 +55,34 @@
   vertical-align: middle;
 }
 
+.chat-stage {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 0.85;
+}
+
+.chat-request {
+  align-self: flex-start;
+  max-width: 90%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--brand-primary);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.chat-request p {
+  margin: 0 0 0.5rem;
+}
+
+.chat-request a {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .chat-header-actions {
   display: flex;
   align-items: center;

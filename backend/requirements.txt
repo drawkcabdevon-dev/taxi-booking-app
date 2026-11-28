@@ -6,3 +6,5 @@ python-dotenv>=1.0
 google-api-python-client>=2.0
 google-auth>=2.0
 google-auth-httplib2>=0.2
+# ADK agent behind /api/chat. The API still runs without it (local turn fallback).
+google-adk>=1.0

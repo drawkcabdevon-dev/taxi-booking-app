@@ -1,5 +1,4 @@
 import { useEffect, useState, type MouseEvent } from 'react';
-import AvailabilityCalendar from './components/AvailabilityCalendar';
 import ChatWidget from './components/ChatWidget';
 import LocationInput from './components/LocationInput';
 import { SERVICE_IMAGES } from './components/serviceImages';
@@ -14,10 +13,11 @@ import {
   type BookingResponse,
   type Service,
 } from './services/api';
+import { buildWhatsappUrl, WHATSAPP_DISPLAY } from './services/bookingAgent';
 
 type View = 'landing' | 'booking' | 'terms' | 'privacy' | 'admin';
 
-const STEPS = ['Service', 'Trip Details', 'Passengers', 'Your Info', 'Review', 'Confirmed'];
+const STEPS = ['Service', 'Trip Details', 'Passengers', 'Your Info', 'Review', 'Request Sent'];
 
 // Fallback service list if the backend is unreachable (e.g. local dev
 // without the API running). Prices stay TBD — never invent them.
@@ -265,11 +265,18 @@ export default function App() {
             placeholder="e.g. Your hotel or address"
           />
           <div className="field">
-            <label>Trip date</label>
-            <AvailabilityCalendar
-              selectedDate={form.trip_date}
-              onSelect={(d) => set('trip_date', d)}
+            <label htmlFor="trip-date">Trip date</label>
+            <input
+              id="trip-date"
+              type="date"
+              min={new Date().toISOString().slice(0, 10)}
+              value={form.trip_date}
+              onChange={(e) => set('trip_date', e.target.value)}
             />
+            <p className="muted">
+              We&apos;ll confirm the date with you — this is a request, not a
+              held reservation.
+            </p>
           </div>
           <div className="field">
             <label htmlFor="time">Pickup time</label>
@@ -435,7 +442,7 @@ export default function App() {
 
       {step === 5 && confirmed && (
         <div className="card">
-          <h2>Booking confirmed</h2>
+          <h2>Booking request received</h2>
           <p>
             Reference: <strong>{confirmed.booking_id}</strong>
           </p>
@@ -443,13 +450,22 @@ export default function App() {
             {selectedService?.name} — {confirmed.trip_date} at {confirmed.trip_time},{' '}
             {confirmed.passengers} passenger(s).
           </p>
-          <p>
-            Total: <strong>Bds${confirmed.total_bbd.toFixed(2)}</strong>
-          </p>
           <p className="muted">
-            {confirmed.email_sent
-              ? 'A confirmation email is on its way.'
-              : 'Email confirmation is not set up yet — the business will confirm with you directly.'}
+            This is a request, not a confirmed booking. Bryan &amp; Marcia review
+            it and quote your rate before anything is agreed.
+          </p>
+          {confirmed.email_sent && (
+            <p className="muted">We&apos;ve emailed the request to Waymaker.</p>
+          )}
+          <p>
+            Prefer WhatsApp? Send it to Marcia on {WHATSAPP_DISPLAY}:{' '}
+            <a
+              href={buildWhatsappUrl(confirmed.booking_id, form, services)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open WhatsApp request
+            </a>
           </p>
           <button onClick={() => setView('landing')}>Back to home</button>
         </div>
@@ -474,7 +490,7 @@ export default function App() {
             </button>
           ) : (
             <button type="button" onClick={submit} disabled={!canContinue() || submitting}>
-              {submitting ? 'Booking…' : 'Confirm Booking'}
+              {submitting ? 'Sending…' : 'Send booking request'}
             </button>
           )}
         </div>

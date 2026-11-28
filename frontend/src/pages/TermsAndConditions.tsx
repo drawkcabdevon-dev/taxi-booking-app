@@ -6,16 +6,18 @@ export default function TermsAndConditions() {
       <h1>Terms &amp; Conditions</h1>
       <p className="muted">Waymaker Taxi Services, Barbados. Last updated: November 2026.</p>
 
-      <h2>1. Bookings</h2>
+      <h2>1. Booking requests</h2>
       <p>
-        Bookings made through this site are confirmed by email. A booking is
-        only confirmed once you receive that confirmation email.
+        Submissions through this site are booking requests, not confirmed
+        bookings. Bryan &amp; Marcia review each request and confirm it
+        directly with you by email or phone.
       </p>
 
       <h2>2. Pricing</h2>
       <p>
-        Prices are shown in Barbados dollars (Bds$) and are calculated per
-        trip or per tour. The price shown at review is the price you pay.
+        Rates are quoted per request on review. No price is charged or
+        calculated when you submit, and this site does not display fixed
+        rates.
       </p>
 
       <h2>3. Cancellation</h2>
